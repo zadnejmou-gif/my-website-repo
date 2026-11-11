@@ -508,5 +508,9 @@ tabs.forEach(function(t,k){t.addEventListener("click",function(){manual=true;pic
 setInterval(function(){if(!manual&&sec.classList.contains("is-current"))pick((i+1)%3)},4200);
 })();
 </script>
+<style id="dropby-phone-mark-polish">
+/* The standalone flying mark has been removed from the phone preview. */
+#the-app .phone-wrap::before{display:none!important;content:none!important;animation:none!important}
+</style>
 </body>
 </html>
