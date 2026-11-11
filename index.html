@@ -113,10 +113,11 @@ html[dir="rtl"] .progress{transform-origin:100% 50%}
 .menu-btn{display:none;position:relative;width:44px;height:44px;border-radius:50%;border:0;background:var(--emerald);color:#fff;cursor:pointer;transition:transform .5s var(--spring),background-color .3s}
 .menu-btn:active{transform:scale(.92)}
 .menu-btn span{position:absolute;left:14px;right:14px;height:2px;border-radius:2px;background:currentColor;transition:transform .55s var(--ease),top .55s var(--ease)}
-.menu-btn span:nth-child(1){top:18px}.menu-btn span:nth-child(2){top:24px}
+.menu-btn span:nth-child(1){top:15px}.menu-btn span:nth-child(2){top:21px;transition:opacity .3s,transform .55s var(--ease)}.menu-btn span:nth-child(3){top:27px}
 .menu-btn[aria-expanded="true"]{background:var(--fresh)}
 .menu-btn[aria-expanded="true"] span:nth-child(1){top:21px;transform:rotate(45deg)}
-.menu-btn[aria-expanded="true"] span:nth-child(2){top:21px;transform:rotate(-45deg)}
+.menu-btn[aria-expanded="true"] span:nth-child(2){opacity:0;transform:scaleX(.2)}
+.menu-btn[aria-expanded="true"] span:nth-child(3){top:21px;transform:rotate(-45deg)}
 .m-menu{position:fixed;inset:0;z-index:55;display:flex;flex-direction:column;justify-content:space-between;padding:112px var(--gutter) calc(32px + env(safe-area-inset-bottom,0px));background:radial-gradient(600px 400px at 85% 10%,#0A5A3D,transparent 70%),var(--night);color:var(--cream);clip-path:circle(0 at calc(100% - 46px) 46px);visibility:hidden;transition:clip-path .9s var(--ease-io),visibility 0s linear .9s}
 html[dir="rtl"] .m-menu{clip-path:circle(0 at calc(100% - 46px) 46px)}
 .m-menu.open{clip-path:circle(150% at calc(100% - 46px) 46px);visibility:visible;transition:clip-path .9s var(--ease-io),visibility 0s}
@@ -185,7 +186,7 @@ body.intro-played .hero h1 .ln{animation:lineUp 1.2s var(--ease) calc(.18s + var
 
 /* hero stage: animated route */
 .hero-visual{position:relative;padding:4% 4% 6%}
-.stage{--mx:0;--my:0;position:relative;width:100%;max-width:600px;margin-inline:auto;aspect-ratio:520/460;container-type:inline-size;direction:ltr}
+.hero-visual .stage{--mx:0;--my:0;position:relative;width:100%;max-width:600px;margin-inline:auto;aspect-ratio:520/460;container-type:inline-size;direction:ltr}
 .map-card{position:absolute;inset:0;border-radius:clamp(22px,6cqw,34px);background:linear-gradient(160deg,rgba(255,255,255,.075),rgba(255,255,255,.015) 60%);box-shadow:inset 0 0 0 1px rgba(255,255,255,.1),inset 0 1px 0 rgba(255,255,255,.12),0 50px 100px -40px rgba(0,0,0,.7);overflow:hidden;transform:translate3d(calc(var(--mx)*8px),calc(var(--my)*8px),0)}
 .map{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
 .map .bld{fill:rgba(255,255,255,.045);stroke:rgba(255,255,255,.13);stroke-width:1}
@@ -536,6 +537,7 @@ html[lang="ar-DZ"] .stat,html[lang="ar-DZ"] .price,html[lang="ar-DZ"] .step-numb
 @media (max-width:900px){
   .nav-links,.nav-end .btn-sm{display:none}
   .menu-btn{display:block}
+  .nav .nav-end{margin-inline-start:auto}
   .nav{height:60px;padding-inline:18px 8px}
   .brand .logo-wm{height:30px}
   .idea-grid,.app-grid,.courier-grid,.bento,.faq-grid,.foot-top,.bridge,.meal{grid-template-columns:1fr}
@@ -684,7 +686,7 @@ Promise.race([f,new Promise(function(r){setTimeout(r,1500)})]).then(function(){r
     <div class="nav-end">
       <span class="lang-wrap"><label class="sr-only" for="languageSelect">Language</label><select class="lang" id="languageSelect" aria-label="Choose language"><option value="en">EN</option><option value="fr">FR</option><option value="ar">العربية</option></select><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 4.5 3 3 3-3"/></svg></span>
       <a class="btn btn-sm btn-glow" href="#how-it-works">How it works</a>
-      <button class="menu-btn" type="button" aria-expanded="false" aria-controls="mobileMenu" aria-label="Menu"><span></span><span></span></button>
+      <button class="menu-btn" type="button" aria-expanded="false" aria-controls="mobileMenu" aria-label="Menu"><span></span><span></span><span></span></button>
     </div>
   </nav>
 </header>
