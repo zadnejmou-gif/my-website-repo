@@ -1062,6 +1062,28 @@ html[dir="rtl"] .x-role{inset:0 0 auto auto}
 .x-phone.sm .x-scrn::before{font-size:10px}
 @media (max-width:720px){.x-float{display:none}}
 
+/* film reel: native scroll (finger / trackpad), moved by reel.js */
+.x-reel{overflow-x:auto;overflow-y:hidden;scrollbar-width:none;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;cursor:grab}
+.x-reel::-webkit-scrollbar{display:none}
+.x-reel-track{animation:none!important;transform:none!important}
+
+/* v2.2: rails dots and mobile polish */
+.x-dots{display:flex;justify-content:center;gap:8px;margin-top:16px}
+.x-dots[hidden]{display:none}
+.x-dots button{width:8px;height:8px;padding:0;border:0;border-radius:99px;background:rgba(255,255,255,.22);cursor:pointer;transition:width .35s var(--ease),background .3s}
+.x-dots button.on{width:26px;background:var(--x-mint)}
+.x-gallery+.x-dots{margin:-28px 0 clamp(40px,5vw,72px)}
+.x-steps,.x-gallery,.x-reel{touch-action:pan-x pan-y}
+.x-dish i{flex:0 0 34px}
+.x-ticket-hd{flex-wrap:wrap;row-gap:4px}
+.x-ticket-hd b,.x-ticket-hd em{white-space:nowrap}
+@media (max-width:720px){
+  .x-stats b{font-size:clamp(20px,6.4vw,27px);white-space:nowrap}
+  .x-dish{width:86%}
+  .x-dish i{flex-basis:30px;height:30px;font-size:18px}
+  .x-ticket-hd span{order:3;flex-basis:100%}
+}
+
 </style>
 </head>
 <body>
@@ -1166,8 +1188,9 @@ Promise.race([f,new Promise(function(r){setTimeout(r,1500)})]).then(function(){r
     <a href="#how-it-works" style="--i:1"><small>02</small>How it works</a>
     <a href="#the-app" style="--i:2"><small>03</small>The app</a>
     <a href="#student-couriers" style="--i:3"><small>04</small>Couriers</a>
-    <a href="#fees-and-safety" style="--i:4"><small>05</small>Fees</a>
-    <a href="#questions" style="--i:5"><small>06</small>FAQ</a>
+    <a href="#restaurants" style="--i:4"><small>05</small>Restaurants</a>
+    <a href="#fees-and-safety" style="--i:5"><small>06</small>Fees</a>
+    <a href="#questions" style="--i:6"><small>07</small>FAQ</a>
   </nav>
   <div class="m-foot"><p>Order · Deliver · Enjoy</p><p>Independent student-led initiative at Université Badji Mokhtar Annaba. Not affiliated with the university administration.</p></div>
 </div>
@@ -1442,7 +1465,7 @@ if(!RM&&"IntersectionObserver" in window)new IntersectionObserver(function(es){c
       </div>
       <div class="foot-links">
         <h4>Explore</h4>
-        <ul><li><a href="#what-is-dropby">The idea</a></li><li><a href="#how-it-works">How it works</a></li><li><a href="#the-app">The app</a></li><li><a href="#student-couriers">Couriers</a></li><li><a href="#fees-and-safety">Fees</a></li><li><a href="#questions">FAQ</a></li></ul>
+        <ul><li><a href="#what-is-dropby">The idea</a></li><li><a href="#how-it-works">How it works</a></li><li><a href="#the-app">The app</a></li><li><a href="#student-couriers">Couriers</a></li><li><a href="#restaurants">Restaurants</a></li><li><a href="#fees-and-safety">Fees</a></li><li><a href="#questions">FAQ</a></li></ul>
       </div>
       <div class="foot-links foot-legal">
         <h4>Legal</h4>
@@ -1642,7 +1665,42 @@ faqs.forEach(function(d){$("summary",d).addEventListener("click",function(e){e.p
 })();
 </script>
 
-<script>(function(){var tr=document.querySelector(".x-reel-track");if(tr){tr.innerHTML+=tr.innerHTML}})();</script>
+<script>
+/* Film reel: scrolls by itself, and the finger (or trackpad) can drag it at any time. */
+(function(){
+var reel=document.querySelector(".x-reel"),track=reel&&reel.querySelector(".x-reel-track");if(!reel||!track)return;
+var n=track.children.length;track.innerHTML+=track.innerHTML;               // two copies -> seamless loop
+[].forEach.call(track.children,function(c,i){if(i>=n)c.setAttribute("aria-hidden","true")});
+var RM=matchMedia("(prefers-reduced-motion: reduce)").matches,pos=0,set=0,last=0,hold=0,visible=true;
+function speed(){return innerWidth<720?34:46}                                // px per second
+function half(){return track.scrollWidth/2}
+function go(x){var h=half();if(h>0){while(x>=h)x-=h;while(x<0)x+=h}pos=x;set=Math.round(x);reel.scrollLeft=set}
+function tick(t){var dt=last?Math.min(200,t-last):0;last=t;
+  if(Math.abs(reel.scrollLeft-set)>2){pos=reel.scrollLeft;set=Math.round(pos)}  // the user moved it: follow
+  if(!RM&&visible&&!document.hidden&&t>hold)go(pos+speed()*dt/1000);
+  requestAnimationFrame(tick)}
+function pause(ms){hold=performance.now()+(ms||2600)}
+["pointerdown","touchstart","wheel"].forEach(function(e){reel.addEventListener(e,function(){pause()},{passive:true})});
+reel.addEventListener("scroll",function(){if(performance.now()<hold){pause();var h=half();if(reel.scrollLeft>=h||reel.scrollLeft<=0)go(reel.scrollLeft)}},{passive:true});
+reel.addEventListener("pointerenter",function(e){if(e.pointerType==="mouse")pause(1e9)});
+reel.addEventListener("pointerleave",function(e){if(e.pointerType==="mouse")pause(400)});
+if("IntersectionObserver" in window)new IntersectionObserver(function(es){visible=es[0].isIntersecting},{threshold:0}).observe(reel);
+requestAnimationFrame(tick);
+})();
+</script>
+<script>
+/* Swipeable rails on phone/tablet: dots show the position and can be tapped. */
+(function(){
+[].forEach.call(document.querySelectorAll(".x-steps,.x-gallery"),function(rail){
+  var items=[].slice.call(rail.children),dots=document.createElement("div");dots.className="x-dots";dots.setAttribute("aria-hidden","true");
+  items.forEach(function(it,i){var b=document.createElement("button");b.type="button";b.tabIndex=-1;b.addEventListener("click",function(){var r=rail.getBoundingClientRect(),c=it.getBoundingClientRect();rail.scrollBy({left:c.left+c.width/2-(r.left+r.width/2),behavior:"smooth"})});dots.appendChild(b)});
+  rail.parentNode.insertBefore(dots,rail.nextSibling);
+  function upd(){var on=rail.scrollWidth>rail.clientWidth+4;dots.hidden=!on;if(!on)return;var r=rail.getBoundingClientRect(),mid=r.left+r.width/2,best=0,bd=1e9;items.forEach(function(it,i){var c=it.getBoundingClientRect(),d=Math.abs(c.left+c.width/2-mid);if(d<bd){bd=d;best=i}});[].forEach.call(dots.children,function(d,i){d.classList.toggle("on",i===best)})}
+  var raf=0;rail.addEventListener("scroll",function(){if(!raf)raf=requestAnimationFrame(function(){raf=0;upd()})},{passive:true});addEventListener("resize",upd);upd();
+});
+})();
+</script>
+
 <!-- legal:start -->
 <style>
 .lgl{position:fixed;inset:0;z-index:1000;display:flex;justify-content:center;align-items:flex-end;background:rgba(0,18,12,.62);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);opacity:0;transition:opacity .3s ease}
