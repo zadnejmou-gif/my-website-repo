@@ -1,0 +1,30 @@
+{
+ "name": "DropBy",
+ "short_name": "DropBy",
+ "description": "Repas du campus, livrés par des étudiants.",
+ "start_url": "/app/",
+ "scope": "/app/",
+ "display": "standalone",
+ "orientation": "portrait",
+ "background_color": "#F8FAF5",
+ "theme_color": "#006B45",
+ "lang": "fr",
+ "icons": [
+  {
+   "src": "/icon-192.png",
+   "sizes": "192x192",
+   "type": "image/png"
+  },
+  {
+   "src": "/icon-512.png",
+   "sizes": "512x512",
+   "type": "image/png"
+  },
+  {
+   "src": "/icon-512.png",
+   "sizes": "512x512",
+   "type": "image/png",
+   "purpose": "maskable"
+  }
+ ]
+}

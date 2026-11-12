@@ -1,4 +1,6 @@
 User-agent: *
 Allow: /
+Disallow: /app/
+Disallow: /resto/
 
 Sitemap: https://www.dropby.study/sitemap.xml
