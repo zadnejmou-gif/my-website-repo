@@ -1,0 +1,29 @@
+{
+  "name": "DropBy",
+  "short_name": "DropBy",
+  "description": "DropBy: student couriers pick up your meal at nearby restaurants and hand it to you on the UBMA campus. No platform fee for students.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#03130D",
+  "theme_color": "#03130D",
+  "lang": "en",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
