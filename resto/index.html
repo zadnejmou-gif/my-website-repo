@@ -231,6 +231,8 @@ select.in{appearance:none;padding-right:36px;cursor:pointer;background:#fff url(
 
 .waitc.self{background:var(--emL);color:var(--em2)}
 .oc .lk{align-self:center}
+
+.banner.nb{background:var(--emL);color:var(--em2);border-color:#BDE8D2;animation:none}
 </style>
 
 <script>window.DROPBY_SUPABASE={url:"https://jbyfbjhchgvezkwfbpmi.supabase.co",key:"sb_publishable_UbhJ2ZF70KqDaBph6Pnvuw_kvyZsuBx"};</script>
@@ -277,6 +279,16 @@ const P={bell:"M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.94 1.94 0 0 0
 const I=({n,s})=>html`<svg class="ic" width=${s||22} height=${s||22} viewBox="0 0 24 24" aria-hidden="true"><path d=${P[n]}/></svg>`;
 
 /* ───────── sound + screen ───────── */
+/* ───────── push notifications (new orders even when the tablet screen is off / tab in background) ───────── */
+const VAPID="BBxvJiiQiMf8nTQ6pdq_W47AFqwjSqbzkJV93A3tfSr9l3mNDu0fylVrgEQjDuZCReqQ8KxWl-xyVa7_aPfDTdk";
+const PS={ok:()=>"serviceWorker" in navigator&&"PushManager" in window&&"Notification" in window,
+ key:s=>{const p=(s+"=".repeat((4-s.length%4)%4)).replace(/-/g,"+").replace(/_/g,"/");return Uint8Array.from([...atob(p)].map(c=>c.charCodeAt(0)))},
+ b64:b=>btoa(String.fromCharCode(...new Uint8Array(b))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,""),
+ async on(ask){if(!PS.ok())return "unsupported";if(ask&&Notification.permission==="default")await Notification.requestPermission();if(Notification.permission!=="granted")return Notification.permission;
+  const reg=await navigator.serviceWorker.register("sw.js");await navigator.serviceWorker.ready;
+  const sub=(await reg.pushManager.getSubscription())||(await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:PS.key(VAPID)}));
+  await rpc("push_register",{p_endpoint:sub.endpoint,p_p256dh:PS.b64(sub.getKey("p256dh")),p_auth:PS.b64(sub.getKey("auth")),p_app:"resto"});return "granted"},
+ async off(){try{const reg=await navigator.serviceWorker.getRegistration(),sub=reg&&await reg.pushManager.getSubscription();if(sub)await rpc("push_unregister",{p_endpoint:sub.endpoint})}catch{}}};
 const AU={ctx:null};
 function audio(){try{AU.ctx=AU.ctx||new (window.AudioContext||window.webkitAudioContext)();if(AU.ctx.state==="suspended")AU.ctx.resume()}catch{}return AU.ctx}
 function ring(){const c=audio();if(!c||c.state!=="running")return;const t=c.currentTime;[[880,0],[1175,.18],[880,.42],[1175,.6]].forEach(([f,d])=>{const o=c.createOscillator(),g=c.createGain();o.type="sine";o.frequency.value=f;g.gain.setValueAtTime(0,t+d);g.gain.linearRampToValueAtTime(.35,t+d+.02);g.gain.exponentialRampToValueAtTime(.001,t+d+.16);o.connect(g).connect(c.destination);o.start(t+d);o.stop(t+d+.18)})}
@@ -317,7 +329,7 @@ function Login({onIn}){const [e,setE]=useState(""),[step,setStep]=useState(0),[c
  </form></div>`}
 
 /* ───────── shell ───────── */
-function App(){const [inS,setIn]=useState(!!SESS);return inS?html`<${Shell} out=${()=>{saveSess(null);setIn(false)}}/>`:html`<${Login} onIn=${()=>{audio();setIn(true)}}/>`}
+function App(){const [inS,setIn]=useState(!!SESS);return inS?html`<${Shell} out=${async()=>{await PS.off();saveSess(null);setIn(false)}}/>`:html`<${Login} onIn=${()=>{audio();setIn(true)}}/>`}
 
 function Shell({out}){const [rests,setRests]=useState(null),[rid,setRid]=useState(pref("rid",null)),[err,setErr]=useState("");
  const load=()=>api("/rest/v1/restaurants?select=*&owner_id=eq."+uid()+"&order=name").then(x=>{setRests(x||[]);if(x&&x.length===1)setRid(x[0].id)}).catch(e=>setErr(e.message));
@@ -329,7 +341,7 @@ function Shell({out}){const [rests,setRests]=useState(null),[rid,setRid]=useStat
  if(!r)return html`<div class="center"><div class="card narrow"><h2>Quel restaurant ?</h2>${rests.map(x=>html`<button class="pick" onClick=${()=>{setPref("rid",x.id);setRid(x.id)}}><b>${x.name}</b><span class="mu">${x.address||""}</span></button>`)}</div></div>`;
  return html`<${Main} r=${r} reload=${load} multi=${rests.length>1} swap=${()=>{setPref("rid",null);setRid(null)}} out=${out}/>`}
 
-function Main({r,reload,multi,swap,out}){const [tab,setTab]=useState("orders"),[orders,setOrders]=useState([]),[wait,setWait]=useState(5),[sound,setSound]=useState(pref("sound",true)),[,tick]=useState(0),[net,setNet]=useState(true),[aud,setAud]=useState(true);
+function Main({r,reload,multi,swap,out}){const [tab,setTab]=useState("orders"),[orders,setOrders]=useState([]),[wait,setWait]=useState(5),[sound,setSound]=useState(pref("sound",true)),[,tick]=useState(0),[net,setNet]=useState(true),[aud,setAud]=useState(true);const [np,setNp]=useState(()=>PS.ok()?Notification.permission:"unsupported");useEffect(()=>{if(np==="granted")PS.on(false).catch(()=>{})},[np]);
  const loadO=()=>api(ORD_Q(r.id)).then(x=>{setOrders(x||[]);setNet(true)}).catch(()=>setNet(false));
  useEffect(()=>{loadO();api("/rest/v1/app_settings?select=vendor_wait_min&id=eq.1").then(x=>x&&x[0]&&setWait(x[0].vendor_wait_min||5)).catch(()=>{});
   const i=setInterval(loadO,8000),j=setInterval(()=>{tick(n=>n+1);rpc("expire_stale_orders").catch(()=>{})},30000),t=setInterval(()=>tick(n=>n+1),1000),stop=live(["orders"],loadO);keepAwake();
@@ -350,6 +362,7 @@ function Main({r,reload,multi,swap,out}){const [tab,setTab]=useState("orders"),[
     <button class=${cls("pill","st-"+(st==="open"&&!inHrs?"hours":st))} onClick=${()=>setTab("hours")}><i></i>${st==="open"?(inHrs?"Ouvert":"Hors horaires ("+String(r.open_hour??8).padStart(2,"0")+":00)"):st==="pause"?"En pause jusqu’à "+hm(r.paused_until):"Fermé"}</button>
     <button class="iconbtn" title=${sound?"Couper le son":"Activer le son"} onClick=${()=>{audio();setPref("sound",!sound);setSound(!sound)}}><${I} n=${sound?"vol":"mute"}/></button>
     <div class="clock"><b>${hm(Date.now())}</b><span>${new Date().toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long"})}</span></div></header>
+   ${np==="default"&&html`<button class="banner nb" onClick=${async()=>{audio();try{setNp(await PS.on(true))}catch(e){alert("Notifications : "+e.message)}}}><${I} n="bell"/>Activer les notifications : soyez prévenu des nouvelles commandes même écran éteint</button>`}
    ${sound&&!aud&&html`<button class="banner" onClick=${()=>{audio();ring()}}><${I} n="bell"/>Touchez ici pour activer la sonnerie des commandes</button>`}
    ${tab==="orders"?html`<${Orders} orders=${orders} wait=${wait} reload=${loadO} r=${r}/>`:tab==="menu"?html`<${Menu} r=${r}/>`:tab==="hours"?html`<${Hours} r=${r} reload=${reload} st=${st}/>`:html`<${Sales} r=${r}/>`}
   </section></div>`}
