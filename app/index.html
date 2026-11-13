@@ -1001,6 +1001,7 @@ html body::before{content:"";position:fixed;inset:0;pointer-events:none;backgrou
 .campus-sw{display:flex;gap:8px;margin:2px 0 4px}.campus-sw .chip{flex:1;justify-content:center}.campus-tag{align-self:center}
 :root .space-row{justify-content:flex-start}:root .space-row .sp{margin-left:auto}.campus-tag{white-space:nowrap;flex-shrink:0}
 .perms .set-row>.col{gap:3px;flex:1;min-width:0;padding-right:12px}.perms .set-row small{font-size:12.5px;line-height:1.35}.perm-msg{color:#b3402a;margin:4px 0 2px}html[data-theme="dark"] .perm-msg{color:#ff8a73}.lv-hint{margin:0 2px 10px;padding:10px 12px;border-radius:12px;background:var(--s2)}
+.camp-row{gap:8px;align-items:flex-start}.camp-row .chips{flex-wrap:wrap}
 
 </style>
 </head>
@@ -1994,7 +1995,10 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
   "Order accepted, on its way, new messages.": "Commande acceptée, en route, nouveaux messages.",
   "Not now": "Pas maintenant",
   Location: "Localisation",
-  Notifications: "Notifications"
+  Notifications: "Notifications",
+  Automatic: "Automatique",
+  "You see the restaurants of this campus.": "Tu vois les restaurants de ce campus.",
+  "Automatic: {c}. DropBy picks the campus you are at.": "Automatique : {c}. DropBy choisit le campus où tu te trouves."
 };
 
 let uiLanguage = "fr";
@@ -2983,6 +2987,7 @@ const DEST = { lat: 36.8166, lng: 7.7247, n: "UBMA Sidi Amar" };
 // campuses: every meeting place belongs to one of them (column meeting_points.zone, SQL v17)
 const ZONES = ["Sidi Amar", "Cefos", "El Bouni"],
   CAMPUSES = ["Sidi Amar", "El Bouni"], // Cefos is a place of the Sidi Amar campus
+  CAMPUS_POS = { "Sidi Amar": { lat: 36.8152, lng: 7.7196 }, "El Bouni": { lat: 36.8608, lng: 7.7275 } },
   campusOf = z => (z === "El Bouni" ? "El Bouni" : "Sidi Amar"),
   MP_ZONE = {},
   R_ZONE = {};
@@ -4810,7 +4815,7 @@ function Customer({
   else if (rest)
     body = html`<div class="app"><div class="scr rise rp" key=${"r" + rest.id}><div class="rp-hero"><${Pic} cls="rp-img" src=${rPic(rest)} alt=${rest.n}/><span class="rp-shade"></span><button class="rp-back" type="button" onClick=${() => setRest(null)} aria-label="Back"><${Ic} n="back"/></button></div><div class="rp-info"><h2>${rest.n}</h2><p class="mu sm">${tr(rest.t)} · ${rest.g}</p><div class="rp-chips"><span class="pill-s"><${Si} n="car"/>${tr("Delivery 100–150 DA")}</span><span class="pill-s"><${Si} n="store"/>${tr("Pickup 0 DA")}</span><span class="pill-s"><${Si} n="clock"/>${fmtH(hrsOf(rest)[0])}–${fmtH(hrsOf(rest)[1])}</span></div></div><div class="sec-h"><h3>Menu</h3><span class="mu sm">${rest.it.length}</span></div>${rest.it.length ? html`<div class="dgrid">${rest.it.map(i => html`<button class="dcard" type="button" onClick=${() => setItem({ ...i, o: i.o[0], note: "", q: 1 })} aria-label=${"Add " + i.n}><span class="dcard-media"><${Pic} cls="dcard-img" src=${i.pic || foodPic(i.n)} alt=${i.n}/></span><b>${i.n}</b><span class="dcard-row"><span class="pr">${i.p} DA</span><span class="dcard-add"><${Ic} n="plus"/></span></span></button>`)}</div>` : html`<div class="card mu sm">Menu coming soon. Check back later.</div>`}${cartBar}</div>${item && html`<${Sheet} close=${() => setItem(null)}><div class="col isheet"><div class="is-media"><${Pic} cls="is-img" src=${item.pic || foodPic(item.n)} alt=${item.n}/></div><div class="row"><h2>${item.n}</h2><span class="sp pr is-p">${item.p} DA</span></div>${cartRest && cartRest.id !== rest.id && html`<p class="sm mu">Your cart has items from ${cartRest.n}. Adding this dish starts a new cart.</p>`}<div class="chips">${rest.it.find(x => x.n === item.n).o.map(o => html`<button class=${"chip" + (item.o === o ? " on" : "")} onClick=${() => setItem({ ...item, o })}>${o}</button>`)}</div><input class="in" placeholder="Special instructions, e.g. no onions" value=${item.note} onInput=${e => setItem({ ...item, note: e.target.value })}/><div class="row"><div class="qty"><button class="qbtn" type="button" aria-label="Decrease quantity" onClick=${() => setItem({ ...item, q: Math.max(1, item.q - 1) })}>−</button><b>${item.q}</b><button class="qbtn" type="button" aria-label="Increase quantity" onClick=${() => setItem({ ...item, q: item.q + 1 })}>+</button></div><button class="btn sp" style=${{ width: "auto", flex: 1 }} onClick=${addItem}>Add, ${item.p * item.q} DA</button></div></div><//>`}</div>`;
   else if (tab === "home")
-    body = html`<div class="app"><div class="scr rise home2" key="home"><div class="hh"><span class="hh-av">${(me.n || "?").trim()[0]}</span><div class="hh-t"><span class="mu sm">Salam,</span><b>${me.n}</b></div></div><h1 class="hh-q">What are you eating today?</h1>${LIVE && html`<div class="campus-sw" role="tablist" aria-label=${tr("Campus")}>${CAMPUSES.map(c => html`<button type="button" role="tab" class=${"chip" + (sx.campus === c ? " on" : "")} onClick=${() => sx.setCampus(c)}>${c}</button>`)}</div>`}${nt && html`<div class="card col notice"><b>${tr("Message from DropBy")}</b><p class="sm">${nt.text}</p><button class="chip" onClick=${() => dismissNote(nt)}>OK</button></div>`}<div class="hero-card"><${Pic} cls="hero-img" src=${HERO} alt=""/><span class="hero-shade"></span><div class="hero-txt"><span class="hero-k">0 DA</span><b>Platform fees. Always.</b><p>Real menu prices. 100–150 DA delivery, or pick it up yourself for free.</p></div></div><${RestList} restaurants=${LIVE ? restaurants.filter(r => r.z === sx.campus) : restaurants} onPick=${setRest}/>${LIVE && !restaurants.some(r => r.z === sx.campus) && html`<p class="sm mu">${tr("No restaurant on this campus yet. Coming soon!")}</p>`}${cartBar}</div></div>`;
+    body = html`<div class="app"><div class="scr rise home2" key="home"><div class="hh"><span class="hh-av">${(me.n || "?").trim()[0]}</span><div class="hh-t"><span class="mu sm">Salam,</span><b>${me.n}</b></div></div><h1 class="hh-q">What are you eating today?</h1>}${nt && html`<div class="card col notice"><b>${tr("Message from DropBy")}</b><p class="sm">${nt.text}</p><button class="chip" onClick=${() => dismissNote(nt)}>OK</button></div>`}<div class="hero-card"><${Pic} cls="hero-img" src=${HERO} alt=""/><span class="hero-shade"></span><div class="hero-txt"><span class="hero-k">0 DA</span><b>Platform fees. Always.</b><p>Real menu prices. 100–150 DA delivery, or pick it up yourself for free.</p></div></div><${RestList} restaurants=${LIVE ? restaurants.filter(r => r.z === sx.campus) : restaurants} onPick=${setRest}/>${LIVE && !restaurants.some(r => r.z === sx.campus) && html`<p class="sm mu">${tr("No restaurant on this campus yet. Coming soon!")}</p>`}${cartBar}</div></div>`;
   else if (tab === "track")
     body = !cur
       ? html`<div class="app"><${Top}/><div class="scr rise"><${Hc}/><h2>No active order</h2><p class="mu sm">Pick a restaurant and your order shows up here live.</p><${Trail}/></div></div>`
@@ -5311,7 +5316,7 @@ function Settings({ me, sx, onOut, children }) {
     .slice(0, 2)
     .join("")
     .toUpperCase();
-  return html`<div class="scr rise"><h2>Settings</h2><div class="card row set-prof"><span class="av">${ini}</span><div class="col" style=${{ gap: 2 }}><b>${me.n}</b><span class="sm mu">${[me.p, me.fac].filter(Boolean).join(" · ")}</span></div></div>${children}${sx.modes && sx.modes.length > 1 && html`<div class="card col set-grp"><b>${tr("My spaces")}</b>${sx.modes.map(m => html`<button type="button" class=${"row set-row space-row" + (sx.view === m[0] ? " on" : "")} onClick=${() => sx.setView(m[0])}><span class="space-ic"><${Ic} n=${MODE_IC[m[0]]}/></span><span>${tr(m[1])}</span>${sx.view === m[0] && html`<span class="sp tag">${tr("Active")}</span>`}</button>`)}</div>`}${LIVE && html`<${PermsCard}/>`}<div class="card col set-grp"><b>Appearance</b><div class="row set-row"><span>Dark mode</span><${Tg} on=${sx.dark} set=${() => sx.setDark(d => !d)}/></div><div class="row set-row"><span>Language</span><div class="chips">${[
+  return html`<div class="scr rise"><h2>Settings</h2><div class="card row set-prof"><span class="av">${ini}</span><div class="col" style=${{ gap: 2 }}><b>${me.n}</b><span class="sm mu">${[me.p, me.fac].filter(Boolean).join(" · ")}</span></div></div>${children}${sx.modes && sx.modes.length > 1 && html`<div class="card col set-grp"><b>${tr("My spaces")}</b>${sx.modes.map(m => html`<button type="button" class=${"row set-row space-row" + (sx.view === m[0] ? " on" : "")} onClick=${() => sx.setView(m[0])}><span class="space-ic"><${Ic} n=${MODE_IC[m[0]]}/></span><span>${tr(m[1])}</span>${sx.view === m[0] && html`<span class="sp tag">${tr("Active")}</span>`}</button>`)}</div>`}${LIVE && sx.setCampus && sx.view === "c" && html`<div class="card col set-grp"><b>${tr("Campus")}</b><div class="col set-row camp-row"><div class="chips">${[[null, tr("Automatic")], ...CAMPUSES.map(c => [c, c])].map(([v, l]) => html`<button type="button" class=${"chip" + ((sx.campusManual || null) === v ? " on" : "")} onClick=${() => sx.setCampus(v)}>${l}</button>`)}</div><small class="sm mu">${sx.campusManual ? tr("You see the restaurants of this campus.") : tr("Automatic: {c}. DropBy picks the campus you are at.").replace("{c}", sx.campusAuto)}</small></div></div>`}${LIVE && html`<${PermsCard}/>`}<div class="card col set-grp"><b>Appearance</b><div class="row set-row"><span>Dark mode</span><${Tg} on=${sx.dark} set=${() => sx.setDark(d => !d)}/></div><div class="row set-row"><span>Language</span><div class="chips">${[
     ["fr", "Français"],
     ["en", "English"]
   ].map(
@@ -6005,29 +6010,36 @@ function App() {
     return () => clearTimeout(t);
   }, [apToast]);
   const [dbRole, setDbRole] = useState(null);
-  const [campus, setCampusS] = useState(() => {
+  // The campus is chosen for the student, without asking: their own choice in Settings if they made one,
+  // otherwise the campus they are at right now (only if location is on), otherwise the campus of their account.
+  const readManual = () => {
     try {
-      return campusOf(localStorage.getItem("dropby-campus"));
+      const v = localStorage.getItem("dropby-campus-manual");
+      return v ? campusOf(v) : null;
     } catch {
-      return "Sidi Amar";
+      return null;
     }
-  });
-  const setCampus = c => {
-    setCampusS(campusOf(c));
-    try {
-      localStorage.setItem("dropby-campus", campusOf(c));
-    } catch {}
   };
+  const [campusManual, setCampusManual] = useState(readManual),
+    [campusHere, setCampusHere] = useState(null);
   const homeCampus = (users.c && users.c.campus) || (users.r && users.r.campus) || null;
+  const G0 = useGeo();
   useEffect(() => {
-    if (homeCampus) {
-      try {
-        if (!localStorage.getItem("dropby-campus")) setCampus(homeCampus);
-      } catch {
-        setCampus(homeCampus);
-      }
-    }
-  }, [homeCampus]);
+    if (!LIVE || !G0.ok()) return setCampusHere(null);
+    GEO.once(p => {
+      const me = { lat: p.coords.latitude, lng: p.coords.longitude };
+      const near = CAMPUSES.map(c => ({ c, d: kmTo(me, CAMPUS_POS[c]) })).sort((a, b) => a.d - b.d)[0];
+      setCampusHere(near && near.d < 4 ? near.c : null); // far from both campuses: keep the account's campus
+    });
+  }, [G0.ok(), !!homeCampus]);
+  const campus = campusManual || campusHere || homeCampus || "Sidi Amar";
+  // c = "Sidi Amar" | "El Bouni" (fixed by the student) or null (automatic again)
+  const setCampus = c => {
+    try {
+      c ? localStorage.setItem("dropby-campus-manual", campusOf(c)) : localStorage.removeItem("dropby-campus-manual");
+    } catch {}
+    setCampusManual(c ? campusOf(c) : null);
+  };
   useEffect(() => {
     if (!LIVE || dbRole !== "admin") return;
     let dead = false;
@@ -6371,6 +6383,8 @@ function App() {
     setView,
     campus,
     setCampus,
+    campusManual,
+    campusAuto: campusHere || homeCampus || "Sidi Amar",
     homeCampus: homeCampus || "Sidi Amar",
     modes: LIVE ? MODES[dbRole] || [] : [],
     uid: (users.c && users.c.uid) || (SBS.s && SBS.s.user && SBS.s.user.id) || null,
