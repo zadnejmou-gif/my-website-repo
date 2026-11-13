@@ -2559,6 +2559,14 @@ function sbRealtime(tables, cb) {
 const ORDERS_Q =
   "/rest/v1/orders?select=*,restaurants(name,address,lat,lng),meeting_points(name,lat,lng),order_items(name,qty,unit_price),order_secrets(pin),ratings(stars),customer:profiles!orders_customer_id_fkey(full_name,phone),courier:profiles!orders_courier_id_fkey(full_name,phone,courier_profiles(rating_avg,rating_count))&order=created_at.desc&limit=80";
 const one = v => (Array.isArray(v) ? v[0] : v);
+const dishGroup = n => {
+  const s = (n || "").toLowerCase();
+  if (/^(eau|coca|jus|bouma|canette|soda|boisson|thé|café)/.test(s)) return 5;
+  if (/^(panuozzo|panini|sandwich)/.test(s)) return 4;
+  if (/pesto/.test(s)) return 3;
+  if (/crème/.test(s)) return 2;
+  return 1;
+};
 const mapRest = r => ({
   z: campusOf(r.zone),
   oh: !r.is_open ? [0, 0] : [r.open_hour ?? 8, r.close_hour ?? 22],
@@ -2573,6 +2581,8 @@ const mapRest = r => ({
   closed: !r.is_open,
   it: (r.menu_items || [])
     .filter(m => m.is_available)
+    // a menu reads in order: pizzas (tomato, then cream, then pesto), panuozzo, drinks; cheapest first in each group
+    .sort((a, b) => dishGroup(a.name) - dishGroup(b.name) || a.price_dzd - b.price_dzd)
     .map(m => ({ id: m.id, n: m.name, d: m.description || "", p: m.price_dzd, o: [], pic: m.image_path || undefined }))
 });
 const mapOrder = (d, uid, name) => {
