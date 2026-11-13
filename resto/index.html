@@ -250,9 +250,13 @@ const KEY="dropby-resto-session";
 let SESS=null;try{SESS=JSON.parse(localStorage.getItem(KEY)||"null")}catch{}
 const saveSess=s=>{SESS=s;try{s?localStorage.setItem(KEY,JSON.stringify(s)):localStorage.removeItem(KEY)}catch{}};
 const withExp=s=>({...s,expires_at:s.expires_at||Math.floor(Date.now()/1000)+(s.expires_in||3600)});
-async function token(){const s=SESS;if(!s)return null;if(s.expires_at&&Date.now()/1000>s.expires_at-60){try{const r=await fetch(SB.url+"/auth/v1/token?grant_type=refresh_token",{method:"POST",headers:HEAD,body:JSON.stringify({refresh_token:s.refresh_token})});if(!r.ok){saveSess(null);location.reload();return null}saveSess(withExp(await r.json()))}catch{return s.access_token}}return SESS&&SESS.access_token}
+let REFRESHING=null;
+async function token(){const s=SESS;if(!s)return null;if(s.expires_at&&Date.now()/1000>s.expires_at-60){
+ // one refresh at a time; only a real "session over" answer (400/401) logs out, a server hiccup keeps the session
+ if(!REFRESHING)REFRESHING=(async()=>{try{const r=await fetch(SB.url+"/auth/v1/token?grant_type=refresh_token",{method:"POST",headers:HEAD,body:JSON.stringify({refresh_token:s.refresh_token})});if(r.status===400||r.status===401){saveSess(null);location.reload();return}if(!r.ok)return;saveSess(withExp(await r.json()))}catch{}})().finally(()=>{REFRESHING=null});
+ await REFRESHING}return SESS&&SESS.access_token}
 async function api(path,opt){opt=opt||{};const tk=await token();if(!tk)throw new Error("Session expirée, reconnecte-toi.");
- const r=await fetch(SB.url+path,{...opt,headers:{apikey:SB.key,Authorization:"Bearer "+tk,"Content-Type":"application/json",...(opt.headers||{})}});
+ let r;try{r=await fetch(SB.url+path,{...opt,headers:{apikey:SB.key,Authorization:"Bearer "+tk,"Content-Type":"application/json",...(opt.headers||{})}})}catch(e){throw new Error("Pas de connexion internet. Vérifie ta connexion et réessaie.")}
  if(!r.ok){let m="";try{const j=await r.json();m=j.message||j.msg||j.error||""}catch{}throw new Error(m||("Erreur "+r.status))}
  if(r.status===204)return null;const t=await r.text();return t?JSON.parse(t):null}
 const rpc=(fn,a)=>api("/rest/v1/rpc/"+fn,{method:"POST",body:JSON.stringify(a||{})});
