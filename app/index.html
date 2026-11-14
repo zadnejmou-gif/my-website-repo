@@ -1058,6 +1058,23 @@ body,button,input,select,textarea{font-family:var(--e-font)}
 :root .pin1 .pin-bad{text-align:center;margin:-4px 0 0}
 :root .shake2{animation:sh .4s}
 :root[data-theme="dark"] .pin1-in{color:#EAF5EE;border-bottom-color:#3DDC97}
+/* ===== 14/11: no dark blocks in light mode (dark mode keeps its own look) ===== */
+:root:not([data-theme="dark"]) .cbtn{background:linear-gradient(160deg,#00A86B,#006B45)!important;box-shadow:0 16px 30px -14px rgba(0,107,69,.65),inset 0 1px 0 rgba(255,255,255,.22)!important;color:#fff!important}
+:root:not([data-theme="dark"]) .cbtn .sp{color:#fff}
+:root:not([data-theme="dark"]) .msh{background:rgba(255,255,255,.97)!important;color:var(--tx)!important;box-shadow:inset 0 0 0 1px var(--e-hair),0 -12px 30px -18px rgba(0,40,25,.35)!important}
+:root:not([data-theme="dark"]) .msh:before{background:rgba(0,0,0,.14)}
+:root:not([data-theme="dark"]) .msh b,:root:not([data-theme="dark"]) .msh h3,:root:not([data-theme="dark"]) .msh strong{color:var(--tx)}
+:root:not([data-theme="dark"]) .msh .mu,:root:not([data-theme="dark"]) .msh .sm,:root:not([data-theme="dark"]) .msh p{color:var(--mu)}
+:root:not([data-theme="dark"]) .om-tag{background:rgba(255,255,255,.96);color:#06331F;box-shadow:0 4px 14px -6px rgba(0,40,25,.35)}
+:root:not([data-theme="dark"]) .vs-k .hi{background:linear-gradient(150deg,#00A86B,#006B45);color:#fff}
+:root:not([data-theme="dark"]) .vs-k .hi b{color:#fff}
+:root:not([data-theme="dark"]) .pinhd{background:linear-gradient(160deg,#E3F5EC,#F8FAF5)!important;color:var(--tx)!important}
+:root:not([data-theme="dark"]) .pinhd h2{color:var(--tx)}
+:root:not([data-theme="dark"]) .pinhd .sm{color:var(--mu);opacity:1}
+:root:not([data-theme="dark"]) .pinhd svg{color:#006B45}
+:root:not([data-theme="dark"]) .msh .sm,:root:not([data-theme="dark"]) .msh .mu,:root:not([data-theme="dark"]) .msh p{color:var(--mu)!important}
+:root:not([data-theme="dark"]) .msh .eta{color:#00875A!important}
+:root:not([data-theme="dark"]) .vs-bars div:last-child i{background:#006B45}
 
 </style>
 </head>
