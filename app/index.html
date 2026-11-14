@@ -1081,6 +1081,21 @@ body,button,input,select,textarea{font-family:var(--e-font)}
 :root .msec-stick.stuck{background:#F8FAF5;box-shadow:0 10px 18px -14px rgba(0,40,25,.35)}
 :root .msec-stick.stuck::before{content:"";position:absolute;left:0;right:0;bottom:100%;height:calc(58px + env(safe-area-inset-top,0px));background:#F8FAF5}
 :root[data-theme="dark"] .msec-stick.stuck,:root[data-theme="dark"] .msec-stick.stuck::before{background:#033524}
+/* QR at hand-off */
+:root .qr-box{width:188px;height:188px;margin:6px auto 2px;padding:10px;border-radius:18px;background:#fff;box-shadow:inset 0 0 0 1px var(--e-hair)}
+:root .qr-box svg{width:100%;height:100%;display:block}
+:root .qr-btn{width:100%;gap:10px}
+:root .qr-btn svg{width:20px;height:20px}
+:root .qr-or{text-align:center;margin:-2px 0 -6px}
+:root .qr-scan{display:flex;flex-direction:column;gap:12px}
+:root .qr-cam{position:relative;aspect-ratio:1;border-radius:22px;overflow:hidden;background:#000}
+:root .qr-cam video{width:100%;height:100%;object-fit:cover;display:block}
+:root .qr-frame{position:absolute;inset:16%;border:3px solid #3DDC97;border-radius:18px;box-shadow:0 0 0 999px rgba(0,0,0,.35)}
+:root .qr-note{text-align:center;color:var(--mu)}
+:root .qr-note.err{color:#b3402a}
+:root:not([data-theme="dark"]) .ticket{background:linear-gradient(170deg,#E6F6EE,#FFFFFF)!important;color:var(--tx)!important;box-shadow:inset 0 0 0 1px rgba(0,107,69,.14),0 18px 36px -24px rgba(0,61,42,.4)!important}
+:root:not([data-theme="dark"]) .ticket .mu,:root:not([data-theme="dark"]) .ticket .sm{color:var(--mu)!important}
+:root:not([data-theme="dark"]) .ticket b{color:var(--tx)}
 
 </style>
 </head>
@@ -2084,7 +2099,17 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
   Add: "Ajouter",
   "Confirm hand-off": "Valider la remise",
   "Checking…": "Vérification…",
-  Code: "Code"
+  Code: "Code",
+  "QR code of your order": "QR code de ta commande",
+  "Camera access is blocked. Allow it in your phone settings, or type the code.":
+    "La caméra est bloquée pour DropBy. Autorise-la dans les réglages du téléphone, ou tape le code.",
+  "The camera is not available. Type the code instead.": "La caméra n’est pas disponible. Tape le code à la place.",
+  "Type the code instead": "Taper le code à la place",
+  "This is not a DropBy QR code.": "Ce QR code n’est pas un code DropBy.",
+  "This QR is for another order.": "Ce QR code est pour une autre commande.",
+  "Scan the customer's QR code": "Scanner le QR code du client",
+  "or type the 4-digit code": "ou tape le code à 4 chiffres",
+  "Show this QR to your courier, or give them the code.": "Montre ce QR code au livreur, ou donne-lui le code."
 };
 
 let uiLanguage = "fr";
@@ -3665,6 +3690,118 @@ const useGeo = () => {
   return GEO;
 };
 
+/* ===== QR code at hand-off =====
+   The customer shows a QR (same secret as the 4-digit code, for this order only); the courier scans it.
+   The 4-digit code stays as the fallback. Libraries (MIT) are loaded only when needed:
+   qrcode.js (Kazuhiko Arase) draws the QR, jsqr.js (cozmo) reads it from the camera. */
+const loadJs = (() => {
+  const P = {};
+  return src =>
+    P[src] ||
+    (P[src] = new Promise((res, rej) => {
+      const s = document.createElement("script");
+      s.src = src;
+      s.onload = res;
+      s.onerror = e => {
+        delete P[src];
+        rej(e);
+      };
+      document.head.appendChild(s);
+    }));
+})();
+const QR_TEXT = (oid, pin) => "DROPBY:" + oid + ":" + pin;
+// "DROPBY:<order id>:<pin>" → { oid, pin } or null
+const qrParse = t => {
+  const m = /^DROPBY:([^:]+):(\d{4,6})$/.exec(String(t || "").trim());
+  return m ? { oid: m[1], pin: m[2] } : null;
+};
+function QRCode({ text }) {
+  const ref = useRef(null),
+    [err, setErr] = useState(false);
+  useEffect(() => {
+    let dead = false;
+    loadJs("qrcode.js")
+      .then(() => {
+        if (dead || !ref.current || !window.qrcode) return;
+        const q = window.qrcode(0, "M");
+        q.addData(text);
+        q.make();
+        ref.current.innerHTML = q.createSvgTag({ cellSize: 6, margin: 2, scalable: true });
+      })
+      .catch(() => setErr(true));
+    return () => {
+      dead = true;
+    };
+  }, [text]);
+  if (err) return null;
+  return html`<div class="qr-box" ref=${ref} role="img" aria-label=${tr("QR code of your order")}></div>`;
+}
+// camera view; onCode(text) returns true when the code is accepted (the camera then stops)
+function QRScanner({ onCode, close, note }) {
+  const v = useRef(null),
+    c = useRef(null),
+    st = useRef(null),
+    [msg, setMsg] = useState("");
+  useEffect(() => {
+    let dead = false,
+      raf = 0,
+      last = "";
+    const stop = () => st.current && st.current.getTracks().forEach(t => t.stop());
+    (async () => {
+      try {
+        await loadJs("jsqr.js");
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) throw new Error("nocam");
+        const s = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" }, audio: false });
+        if (dead) return s.getTracks().forEach(t => t.stop());
+        st.current = s;
+        const vid = v.current;
+        vid.setAttribute("playsinline", "");
+        vid.muted = true;
+        vid.srcObject = s;
+        await vid.play();
+        const tick = () => {
+          if (dead) return;
+          if (vid.readyState >= 2 && vid.videoWidth) {
+            const w = vid.videoWidth,
+              h = vid.videoHeight,
+              cv = c.current;
+            cv.width = w;
+            cv.height = h;
+            const ctx = cv.getContext("2d", { willReadFrequently: true });
+            ctx.drawImage(vid, 0, 0, w, h);
+            const r = window.jsQR(ctx.getImageData(0, 0, w, h).data, w, h, { inversionAttempts: "dontInvert" });
+            if (r && r.data && r.data !== last) {
+              last = r.data;
+              if (onCode(r.data) === true) {
+                dead = true;
+                stop();
+                return;
+              }
+              setTimeout(() => (last = ""), 1500); // the same wrong QR is tried again after a moment
+            }
+          }
+          raf = requestAnimationFrame(tick);
+        };
+        tick();
+      } catch (e) {
+        setMsg(
+          tr(
+            e && e.name === "NotAllowedError"
+              ? "Camera access is blocked. Allow it in your phone settings, or type the code."
+              : "The camera is not available. Type the code instead."
+          )
+        );
+      }
+    })();
+    return () => {
+      dead = true;
+      cancelAnimationFrame(raf);
+      stop();
+    };
+  }, []);
+  return html`<div class="qr-scan"><div class="qr-cam"><video ref=${v} playsinline muted></video><canvas ref=${c} hidden></canvas><i class="qr-frame"></i></div>${(note || msg) && html`<p class=${"sm qr-note" + (msg ? " err" : "")} role="status">${msg || note}</p>`}<button type="button" class="btn g" onClick=${close}>${tr("Type the code instead")}</button></div>`;
+}
+
 const LEGAL = {
   privacy: {
     fr: {
@@ -5050,7 +5187,7 @@ function Customer({
                 );
             else setOrders(x => x.map(y => (y.id === cur.id ? { ...y, vs: "done", stage: 4, t: now() } : y)));
           }}>${tr("I collected my order")}</button></div>`
-        }${cur.stage < 3 && (["sched", "find", "new"].includes(cur.vs) ? html`<button class="btn g" type="button" onClick=${() => setCancelStep(1)}>${tr("Cancel order")}</button>` : html`<p class="sm no-cancel">${tr("The restaurant accepted your order, so it can no longer be cancelled.")}</p>`)}${cur.vs === "sched" && html`<div class="card col"><b>${tr("Scheduled order")}</b><p class="sm mu">${tr("Scheduled for")} ${hhmm(cur.sched)}</p></div>`}${cur.stage === 0 && !!cur.ts && !cur.pickup && html`<div class="card col"><b>${tr(cur.vs === "new" ? "Waiting for the restaurant" : cur.released ? "Your runner dropped the order" : "Looking for a runner")}</b><p class="sm mu">${tr(cur.vs === "new" ? "The restaurant is confirming your order." : Date.now() - cur.ts >= WAIT_HELP ? "No runner yet. Add a tip so it stands out, or cancel." : "Runners nearby are being notified.")} ${tr("Auto-cancel in")} ${Math.max(0, Math.ceil((EXPIRE - (Date.now() - cur.ts)) / 1000))}s</p>${cur.vs !== "new" && Date.now() - cur.ts >= WAIT_HELP && (cur.boost || 0) < 3 && !cur.live && html`<button class="btn" type="button" onClick=${() => boost(cur)}>${tr("Add +50 DA tip")}</button>`}</div>`}${placedId === cur.id && cur.stage === 0 && html`<div class="card order-confirmation"><b>Order confirmed!</b><p class="sm">Your order is in. Follow its progress below.</p><button class="btn g" style=${{ display: cur.pickup ? "none" : undefined }} onClick=${onOpenRunner} hidden=${!!cur.live}>Open delivery demo</button>${cur.rid && !cur.live && html`<button class="btn g" onClick=${() => sx.openVendor(cur.rid)}>Open restaurant demo</button>`}</div>`}${cur.id === "demo1" && cur.stage < 4 && html`<div class="card demo-hint"><b>Delivery demo</b><p>Switch to Delivery guy above, accept the order, then advance the pickup steps. Enter this PIN to finish the hand-off.</p></div>`}${cur.vs === "new" && cur.stage >= 1 && cur.stage < 3 && html`<div class="card col vchip"><span class="vtag">${tr("Waiting for the restaurant")}</span><span class="sm mu">${tr("The restaurant is confirming your order.")}</span></div>`}${cur.vs && cur.vs !== "new" && cur.stage < 3 && html`<div class="card row vchip"><span class=${"vtag" + (cur.vs === "ready" ? " ok" : "")}>${tr(cur.vs === "ready" ? "Your order is ready at the restaurant" : "Preparing")}</span>${cur.vs === "prep" && html`<span class="sm mu sp">~${Math.max(0, Math.ceil((cur.at + cur.prep * 60000 - Date.now()) / 60000))} min</span>`}</div>`}<div class="stepper" style=${{ display: cur.pickup ? "none" : undefined }}>${STEPS.map((s, i) => html`<div class=${"stp" + (cur.stage > i || cur.stage === 4 ? " done" : cur.stage === i ? " cur" : "")}><span class="stp-dot">${cur.stage > i || cur.stage === 4 ? "✓" : i + 1}</span><span class="stp-l">${tr(s)}</span></div>`)}</div>${cur.pickup ? null : cur.stage < 4 ? html`<div class="card col ticket"><span class="tkicon"><${Ic} n="shield"/></span><b>${tr("Delivery code")}</b><p class="sm mu">Give this code to your runner at hand-off</p><div class="pinrow big">${cur.pin.split("").map(d => html`<span>${d}</span>`)}</div></div><div class="row">${cur.stage >= 1 && html`<button class="btn g" onClick=${() => setCh(true)}><${Ic} n="chat"/>Chat${chatUnread(cur.id) > 0 && html`<em class="chat-bdg">${chatUnread(cur.id)}</em>`}</button>`}${cur.stage >= 1 && html`<button class="btn g" onClick=${() => setRep(cur)}>${tr("Report a problem")}</button>`}${cur.stage < 3 && html`<button class="btn g" style=${{ display: cur.live ? "none" : undefined }} onClick=${() => adv(cur.id)}>Demo: advance</button>`}</div>` : html`<div class="card"><b>Delivered.</b><p class="sm mu">Pay ${cur.total} DA in cash to ${cur.run && cur.run.n}.</p></div>`}</div></div>`;
+        }${cur.stage < 3 && (["sched", "find", "new"].includes(cur.vs) ? html`<button class="btn g" type="button" onClick=${() => setCancelStep(1)}>${tr("Cancel order")}</button>` : html`<p class="sm no-cancel">${tr("The restaurant accepted your order, so it can no longer be cancelled.")}</p>`)}${cur.vs === "sched" && html`<div class="card col"><b>${tr("Scheduled order")}</b><p class="sm mu">${tr("Scheduled for")} ${hhmm(cur.sched)}</p></div>`}${cur.stage === 0 && !!cur.ts && !cur.pickup && html`<div class="card col"><b>${tr(cur.vs === "new" ? "Waiting for the restaurant" : cur.released ? "Your runner dropped the order" : "Looking for a runner")}</b><p class="sm mu">${tr(cur.vs === "new" ? "The restaurant is confirming your order." : Date.now() - cur.ts >= WAIT_HELP ? "No runner yet. Add a tip so it stands out, or cancel." : "Runners nearby are being notified.")} ${tr("Auto-cancel in")} ${Math.max(0, Math.ceil((EXPIRE - (Date.now() - cur.ts)) / 1000))}s</p>${cur.vs !== "new" && Date.now() - cur.ts >= WAIT_HELP && (cur.boost || 0) < 3 && !cur.live && html`<button class="btn" type="button" onClick=${() => boost(cur)}>${tr("Add +50 DA tip")}</button>`}</div>`}${placedId === cur.id && cur.stage === 0 && html`<div class="card order-confirmation"><b>Order confirmed!</b><p class="sm">Your order is in. Follow its progress below.</p><button class="btn g" style=${{ display: cur.pickup ? "none" : undefined }} onClick=${onOpenRunner} hidden=${!!cur.live}>Open delivery demo</button>${cur.rid && !cur.live && html`<button class="btn g" onClick=${() => sx.openVendor(cur.rid)}>Open restaurant demo</button>`}</div>`}${cur.id === "demo1" && cur.stage < 4 && html`<div class="card demo-hint"><b>Delivery demo</b><p>Switch to Delivery guy above, accept the order, then advance the pickup steps. Enter this PIN to finish the hand-off.</p></div>`}${cur.vs === "new" && cur.stage >= 1 && cur.stage < 3 && html`<div class="card col vchip"><span class="vtag">${tr("Waiting for the restaurant")}</span><span class="sm mu">${tr("The restaurant is confirming your order.")}</span></div>`}${cur.vs && cur.vs !== "new" && cur.stage < 3 && html`<div class="card row vchip"><span class=${"vtag" + (cur.vs === "ready" ? " ok" : "")}>${tr(cur.vs === "ready" ? "Your order is ready at the restaurant" : "Preparing")}</span>${cur.vs === "prep" && html`<span class="sm mu sp">~${Math.max(0, Math.ceil((cur.at + cur.prep * 60000 - Date.now()) / 60000))} min</span>`}</div>`}<div class="stepper" style=${{ display: cur.pickup ? "none" : undefined }}>${STEPS.map((s, i) => html`<div class=${"stp" + (cur.stage > i || cur.stage === 4 ? " done" : cur.stage === i ? " cur" : "")}><span class="stp-dot">${cur.stage > i || cur.stage === 4 ? "✓" : i + 1}</span><span class="stp-l">${tr(s)}</span></div>`)}</div>${cur.pickup ? null : cur.stage < 4 ? html`<div class="card col ticket"><span class="tkicon"><${Ic} n="shield"/></span><b>${tr("Delivery code")}</b><p class="sm mu">${tr("Show this QR to your courier, or give them the code.")}</p>${cur.live && /^[0-9]{4,6}$/.test(String(cur.pin)) && html`<${QRCode} text=${QR_TEXT(cur.id, cur.pin)}/>`}<div class="pinrow big">${cur.pin.split("").map(d => html`<span>${d}</span>`)}</div></div><div class="row">${cur.stage >= 1 && html`<button class="btn g" onClick=${() => setCh(true)}><${Ic} n="chat"/>Chat${chatUnread(cur.id) > 0 && html`<em class="chat-bdg">${chatUnread(cur.id)}</em>`}</button>`}${cur.stage >= 1 && html`<button class="btn g" onClick=${() => setRep(cur)}>${tr("Report a problem")}</button>`}${cur.stage < 3 && html`<button class="btn g" style=${{ display: cur.live ? "none" : undefined }} onClick=${() => adv(cur.id)}>Demo: advance</button>`}</div>` : html`<div class="card"><b>Delivered.</b><p class="sm mu">Pay ${cur.total} DA in cash to ${cur.run && cur.run.n}.</p></div>`}</div></div>`;
   else if (tab === "set")
     body = html`<div class="app"><${Top}/><${Settings} me=${me} sx=${sx} onOut=${sx.out}>${!LIVE && html`<div class="card row"><span>Credit</span><b class="sp pr">${me.credit || 0} DA</b></div>`}<//></div>`;
   else {
@@ -5150,6 +5287,8 @@ function MenuSections({ items, card }) {
 function Runner({ me, st, orders, setOrders, chat, send, pop, setPop, again, addReport, notes, dismissNote, sx }) {
   useChatStore();
   const [tab, setTab] = useState("feed"),
+    [scan, setScan] = useState(false),
+    [scanNote, setScanNote] = useState(""),
     [q, setQ] = useState(""),
     [z, setZ] = useState("All"),
     [sort, setSort] = useState("km"),
@@ -5355,7 +5494,34 @@ function Runner({ me, st, orders, setOrders, chat, send, pop, setPop, again, add
         setSel(null);
       }
     }}/>`
-  }${pm && act && html`<${Sheet} pin=${1} close=${() => setPm(false)}><div class="pinhd"><${Ic} n="shield"/><h2>Hand-off PIN</h2><p class="sm">${tr("Ask {c} for the 4-digit code, then collect {b} DA.").replace("{c}", act.c).replace("{b}", act.total)}</p><svg class="wv" viewBox="0 0 390 30" preserveAspectRatio="none" aria-hidden="true"><path d="M0 30V16C60 -2 130 -2 200 14S330 28 390 8V30Z" fill="#FDFBF7"/></svg></div><${Pin} onDone=${fin} label="Confirm hand-off"/><//>`}${ch && html`<${act && act.live ? LiveChat : Chat} o=${act} msgs=${chat} side="r" send=${send} close=${() => setCh(false)}/>`}</div>`;
+  }${
+    pm &&
+    act &&
+    html`<${Sheet} pin=${1} close=${() => setPm(false)}><div class="pinhd"><${Ic} n="shield"/><h2>Hand-off PIN</h2><p class="sm">${tr("Ask {c} for the 4-digit code, then collect {b} DA.").replace("{c}", act.c).replace("{b}", act.total)}</p><svg class="wv" viewBox="0 0 390 30" preserveAspectRatio="none" aria-hidden="true"><path d="M0 30V16C60 -2 130 -2 200 14S330 28 390 8V30Z" fill="#FDFBF7"/></svg></div>${
+      scan
+        ? html`<${QRScanner} note=${scanNote} close=${() => {
+            setScan(false);
+            setScanNote("");
+          }} onCode=${t => {
+            const q = qrParse(t);
+            if (!q) {
+              setScanNote(tr("This is not a DropBy QR code."));
+              return false;
+            }
+            if (act && act.live && q.oid !== String(act.id)) {
+              setScanNote(tr("This QR is for another order."));
+              return false;
+            }
+            setScan(false);
+            setScanNote("");
+            Promise.resolve(fin(q.pin)).then(ok => {
+              if (!ok) alert(tr("Wrong code. Ask the customer again."));
+            });
+            return true;
+          }}/>`
+        : html`<button type="button" class="btn qr-btn" onClick=${() => setScan(true)}><${Ic} n="cam"/>${tr("Scan the customer's QR code")}</button><p class="sm mu qr-or">${tr("or type the 4-digit code")}</p><${Pin} onDone=${fin} label="Confirm hand-off"/>`
+    }<//>`
+  }${ch && html`<${act && act.live ? LiveChat : Chat} o=${act} msgs=${chat} side="r" send=${send} close=${() => setCh(false)}/>`}</div>`;
 }
 
 const IDCard = ({ a }) =>
