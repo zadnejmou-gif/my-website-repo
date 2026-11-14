@@ -1041,6 +1041,14 @@ body,button,input,select,textarea{font-family:var(--e-font)}
 /* restaurant menu editor: the section field is a small, labelled field */
 :root .re-sec{height:30px;margin-top:6px;padding:2px 10px;font-size:12.5px;border-radius:10px;max-width:200px;background:var(--s2)}
 
+/* fix 14/11: the scroll area's bottom padding already makes room for the nav; the cart bar sits right above it */
+:root .app:has(>.nav) .scr>.cart-bar{bottom:-28px!important}
+/* fix 14/11: section tabs stick just under the floating cart/theme buttons, full width, never beside them */
+:root .msec-bar{top:calc(58px + env(safe-area-inset-top,0px));margin:0 -18px 4px;padding:10px 18px;border-radius:0}
+:root .msec{scroll-margin-top:calc(124px + env(safe-area-inset-top,0px))}
+:root .msec-sent{display:block;height:1px}
+:root .msec-bar.stuck{background:rgba(248,250,245,.97);box-shadow:0 calc(-58px - env(safe-area-inset-top,0px)) 0 0 rgba(248,250,245,.97),0 10px 18px -14px rgba(0,40,25,.35)}
+:root[data-theme="dark"] .msec-bar.stuck{background:rgba(9,52,37,.97);box-shadow:0 calc(-58px - env(safe-area-inset-top,0px)) 0 0 rgba(9,52,37,.97),0 10px 18px -14px rgba(0,0,0,.6)}
 
 </style>
 </head>
@@ -5029,12 +5037,25 @@ function MenuSections({ items, card }) {
   });
   const ref = useRef({}),
     bar = useRef(null),
-    [cur, setCur] = useState(secs[0] && secs[0].s);
+    [cur, setCur] = useState(secs[0] && secs[0].s),
+    [stuck, setStuck] = useState(false),
+    sent = useRef(null);
+  // the bar gets a solid header behind it once it is stuck at the top
+  useEffect(() => {
+    if (!sent.current || !("IntersectionObserver" in window)) return;
+    const io = new IntersectionObserver(([e]) => setStuck(!e.isIntersecting && e.boundingClientRect.top < 120), {
+      rootMargin: "-70px 0px 0px 0px"
+    });
+    io.observe(sent.current);
+    return () => io.disconnect();
+  }, [secs.length]);
   useEffect(() => {
     if (secs.length < 2 || !("IntersectionObserver" in window)) return;
     const io = new IntersectionObserver(
       es => {
-        const v = es.filter(e => e.isIntersecting).sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)[0];
+        const v = es
+          .filter(e => e.isIntersecting)
+          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)[0];
         if (v) setCur(v.target.dataset.s);
       },
       { rootMargin: "-120px 0px -55% 0px" }
@@ -5049,7 +5070,7 @@ function MenuSections({ items, card }) {
     if (c) b.scrollTo({ left: c.offsetLeft - 16, behavior: "smooth" });
   }, [cur]);
   if (secs.length < 2) return html`<div class="dlist">${items.map(card)}</div>`;
-  return html`<div class="msec-bar" role="tablist" ref=${bar}>${secs.map(
+  return html`<i class="msec-sent" ref=${sent}></i><div class=${"msec-bar" + (stuck ? " stuck" : "")} role="tablist" ref=${bar}>${secs.map(
     g =>
       html`<button type="button" role="tab" aria-selected=${cur === g.s} class=${"msec-chip" + (cur === g.s ? " on" : "")} onClick=${() => {
         setCur(g.s);
@@ -5968,10 +5989,10 @@ function App() {
     pushed = useRef(false),
     [vId, setVId] = useState(null),
     [prefs, setPrefs] = useState({ auto: false, prep: 15, avail: true }),
+    // light by default; dark only when the user chose it (the phone's own dark mode is not followed)
     [dark, setDark] = useState(() => {
       try {
-        const saved = localStorage.getItem("dropby-theme");
-        return saved ? saved === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+        return localStorage.getItem("dropby-theme-choice") === "dark";
       } catch {
         return false;
       }
@@ -5979,7 +6000,7 @@ function App() {
   useEffect(() => {
     document.documentElement.dataset.theme = dark ? "dark" : "light";
     try {
-      localStorage.setItem("dropby-theme", dark ? "dark" : "light");
+      localStorage.setItem("dropby-theme-choice", dark ? "dark" : "light");
     } catch {}
   }, [dark]);
   useEffect(() => {
