@@ -3362,6 +3362,24 @@ const askNotif = () => {
     if ("Notification" in window && Notification.permission === "default") Notification.requestPermission();
   } catch (e) {}
 };
+// orders the customer removed from their history: remembered on this phone, so the next reload does not bring them back
+const HIDDEN = {
+  k: () => "dropby-hidden-orders-" + ((SBS.s && SBS.s.user && SBS.s.user.id) || "demo"),
+  get() {
+    try {
+      return new Set(JSON.parse(localStorage.getItem(HIDDEN.k()) || "[]"));
+    } catch (e) {
+      return new Set();
+    }
+  },
+  add(id) {
+    const s = HIDDEN.get();
+    s.add(String(id));
+    try {
+      localStorage.setItem(HIDDEN.k(), JSON.stringify([...s].slice(-300)));
+    } catch (e) {}
+  }
+};
 const MYPOS = { pos: null, wid: null, lastUp: 0 };
 const myPosStart = () => {
   if (MYPOS.wid != null || !GEO.ok()) return;
@@ -4931,7 +4949,10 @@ function Customer({
     setCo(false);
     setTab("home");
   };
-  const del = id => setOrders(x => x.filter(y => y.id !== id));
+  const del = id => {
+    HIDDEN.add(id);
+    setOrders(x => x.filter(y => y.id !== id));
+  };
   const boost = o =>
     setOrders(x =>
       x.map(y =>
@@ -5027,12 +5048,14 @@ function Customer({
   else if (tab === "set")
     body = html`<div class="app"><${Top}/><${Settings} me=${me} sx=${sx} onOut=${sx.out}>${!LIVE && html`<div class="card row"><span>Credit</span><b class="sp pr">${me.credit || 0} DA</b></div>`}<//></div>`;
   else {
-    const hs = orders.filter(o => o.mine && (o.stage === 4 || o.x));
+    const hidden = HIDDEN.get(),
+      hs = orders.filter(o => o.mine && (o.stage === 4 || o.x) && !hidden.has(String(o.id)));
     body = html`<div class="app"><${Top}/><div class="scr rise"><h2>Past orders</h2>${
       hs.length
         ? hs
             .slice()
             .reverse()
+            .sort((a, b) => (b.t0 || 0) - (a.t0 || 0)) // newest first
             .map(
               o =>
                 html`<div class="card col"><div class="row"><b>${o.rest}</b><span class="sp pr">${o.total} DA</span></div><p class="sm">${o.items}</p><p class="mu sm">${o.t}</p>${o.stars && html`<p class="sm rate-mini">${"★".repeat(o.stars) + "☆".repeat(5 - o.stars)}${o.review ? " · " + o.review : ""}</p>`}${o.x ? html`<div class="row"><span class="tag cancelled-tag">Cancelled</span><button class="btn g s sp" type="button" onClick=${() => del(o.id)}><${Ic} n="trash"/>Delete</button></div>${o.why && html`<p class="sm mu x-why">${tr(o.why)}</p>`}` : o.run && html`<p class="sm mu">Delivered by ${o.run.n}, ${o.run.ph}</p><button class="chip" type="button" onClick=${() => setRep(o)}>${tr("Report a problem")}</button>`}</div>`
