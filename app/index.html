@@ -1125,6 +1125,30 @@ body,button,input,select,textarea{font-family:var(--e-font)}
 :root .bc-sheet h2{margin:0}
 :root .cr-check{margin:2px 0 8px;padding:10px 12px;border-radius:12px;background:#FFF4E5;color:#7A4B00}html[data-theme="dark"] .cr-check{background:#3a2c12;color:#F5D9A8}
 
+/* courier QR scanner v2: compact camera, corner brackets, scan line; the 4-digit field stays visible under it */
+:root .qr-scan{gap:10px}
+:root .qr-cam{position:relative;width:100%;aspect-ratio:4/3;max-height:38vh;border-radius:24px;overflow:hidden;background:radial-gradient(120% 90% at 50% 40%,#173326,#06120d);box-shadow:0 18px 40px -22px rgba(0,40,26,.7),inset 0 0 0 1px rgba(255,255,255,.08)}
+:root .qr-cam video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+:root .qr-frame{display:none}
+:root .qr-ov{position:absolute;left:50%;top:50%;width:min(56%,74vw);aspect-ratio:1;transform:translate(-50%,-46%);border-radius:20px;box-shadow:0 0 0 999px rgba(2,16,10,.42)}
+:root .qr-ov .k{position:absolute;width:22%;height:22%;border:4px solid #fff;filter:drop-shadow(0 2px 6px rgba(0,0,0,.4))}
+:root .qr-ov .tl{left:-2px;top:-2px;border-right:0;border-bottom:0;border-radius:20px 0 0 0}
+:root .qr-ov .tr{right:-2px;top:-2px;border-left:0;border-bottom:0;border-radius:0 20px 0 0}
+:root .qr-ov .bl{left:-2px;bottom:-2px;border-right:0;border-top:0;border-radius:0 0 0 20px}
+:root .qr-ov .br{right:-2px;bottom:-2px;border-left:0;border-top:0;border-radius:0 0 20px 0}
+:root .qr-line{position:absolute;left:8%;right:8%;top:8%;height:3px;border-radius:3px;background:linear-gradient(90deg,transparent,#3DDC97,transparent);box-shadow:0 0 16px 3px rgba(61,220,151,.55);animation:qrSweep 1.8s ease-in-out infinite alternate}
+@keyframes qrSweep{to{top:90%}}
+:root .qr-hint{position:absolute;left:50%;top:12px;transform:translateX(-50%);padding:6px 12px;border-radius:999px;background:rgba(2,16,10,.62);backdrop-filter:blur(8px);color:#fff;font-size:12px;font-weight:600;white-space:nowrap}
+:root .qr-x{position:absolute;right:10px;top:10px;width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:rgba(2,16,10,.62);backdrop-filter:blur(8px);color:#fff;border:0}
+:root .qr-x svg{width:16px;height:16px}
+:root .qr-x:active{transform:scale(.92)}
+:root .qr-msg{position:absolute;left:16px;right:16px;bottom:14px;margin:0;padding:10px 12px;border-radius:14px;background:rgba(2,16,10,.78);color:#fff;font-size:13px;line-height:1.4;text-align:center}
+:root .qr-cam.off .qr-ov,:root .qr-cam.off .qr-hint{display:none}
+:root .qr-note{margin:0;padding:8px 12px;border-radius:12px;background:#FFF1EC;color:#9A3B23!important;text-align:center}
+html[data-theme="dark"] .qr-note{background:#3a1e16;color:#F5B9A6!important}
+:root .qr-or{margin:2px 0 -4px}
+@media(prefers-reduced-motion:reduce){:root .qr-line{animation:none;top:50%}}
+
 </style>
 </head>
 <body>
@@ -2191,8 +2215,15 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
   "While we check your card, you can keep ordering food as usual.":
     "Pendant qu’on vérifie ta carte, tu peux continuer à commander comme d’habitude.",
   "Log in": "Se connecter",
-  "Password": "Mot de passe",
-  "Approve only if the first and last name in the app match the student card exactly.": "Valide seulement si le prénom et le nom dans l’app correspondent exactement à la carte d’étudiant."
+  Password: "Mot de passe",
+  "Approve only if the first and last name in the app match the student card exactly.":
+    "Valide seulement si le prénom et le nom dans l’app correspondent exactement à la carte d’étudiant.",
+  "Point at the customer's QR code": "Vise le QR code du client",
+  "Close the camera": "Fermer la caméra",
+  "Create a password (8 characters or more)": "Crée un mot de passe (8 caractères ou plus)",
+  "Type the password again": "Retape le mot de passe",
+  "You'll log in with your email and this password. Forgot it? We send you a code by email.":
+    "Tu te connecteras avec ton e-mail et ce mot de passe. Oublié ? On t’envoie un code par e-mail."
 };
 
 let uiLanguage = "fr";
@@ -2546,15 +2577,16 @@ const Sheet = ({ close, children, pin }) =>
 
 // One-time code field (email code at sign-in, hand-off code): one field, the phone's own number keyboard.
 // iPhone and Android offer the code from the email/SMS above the keyboard (autocomplete="one-time-code").
-function Pin({ onDone, len = 4, label }) {
+function Pin({ onDone, len = 4, label, auto = true }) {
   const [v, setV] = useState(""),
     [bad, setBad] = useState(0),
     [busy, setBusy] = useState(false),
     ref = useRef(null);
   useEffect(() => {
+    if (!auto) return;
     const t = setTimeout(() => ref.current && ref.current.focus(), 300);
     return () => clearTimeout(t);
-  }, []);
+  }, [auto]);
   const submit = async code => {
     if (busy || code.length < len) return;
     setBusy(true);
@@ -3034,6 +3066,7 @@ function Auth({ def, onDone, onDemo, language, onLanguage, blocked }) {
       (LIVE || !getAcc(role, ne)) &&
       f.n.trim().length > 1 &&
       (role !== "r" || (first.trim().length > 1 && last.trim().length > 1)) &&
+      (!LIVE || mode !== "new" || (pw.length >= 8 && pw === pw2)) &&
       !!ne &&
       !!np &&
       (role === "r" ? img : true),
@@ -3124,13 +3157,18 @@ function Auth({ def, onDone, onDemo, language, onLanguage, blocked }) {
         if (!sess || !sess.access_token) return fail();
         sbSave({ ...sess, expires_at: sess.expires_at || Math.floor(Date.now() / 1000) + (sess.expires_in || 3600) });
         const p = (await sbProfile(sess)) || {};
-        setPend({
+        const d = {
           n: p.full_name || f.n,
           p: p.phone || f.p,
           uid: sess.user && sess.user.id,
           role: p.role,
           campus: p.campus || campusOf(f.fac)
-        });
+        };
+        if (why === "signup" && pw.length >= 8 && pw === pw2) {
+          savePw(d);
+          return true;
+        }
+        setPend(d);
         setPw("");
         setPw2("");
         setPwErr("");
@@ -3139,7 +3177,9 @@ function Auth({ def, onDone, onDemo, language, onLanguage, blocked }) {
       })
       .catch(() => fail());
   };
-  const savePw = async () => {
+  // d: the account to open once the password is saved (sign-up passes it directly, other cases use pend)
+  const savePw = async d => {
+    const data = d && d.uid !== undefined ? d : pend;
     if (pw.length < 8) return setPwErr(tr("Use at least 8 characters."));
     if (pw !== pw2) return setPwErr(tr("The two passwords don't match."));
     setBusy(true);
@@ -3160,9 +3200,12 @@ function Auth({ def, onDone, onDemo, language, onLanguage, blocked }) {
         throw new Error(m || "HTTP " + r.status);
       }
       setBusy(false);
-      done(pend);
+      done(data);
     } catch (e) {
       setBusy(false);
+      // sign-up: show the password screen so the student can try again
+      setPend(data);
+      setStep(2);
       const m = String((e && e.message) || "");
       setPwErr(
         tr(
@@ -3187,7 +3230,7 @@ function Auth({ def, onDone, onDemo, language, onLanguage, blocked }) {
     }}/><input class="in" type="password" autocomplete="new-password" placeholder=${tr("Type it again")} value=${pw2} onInput=${e => {
       setPw2(e.target.value);
       setPwErr("");
-    }} onKeyDown=${e => e.key === "Enter" && savePw()}/>${pwErr && html`<p class="sm err-t">${pwErr}</p>`}<button class="btn" type="button" disabled=${busy || !pw || !pw2} onClick=${savePw}>${tr(busy ? "Saving…" : "Save my password")}</button>${why === "code" && html`<button class="btn g" type="button" disabled=${busy} onClick=${() => done(pend)}>${tr("Not now, maybe later")}</button>`}</div></div></div>`;
+    }} onKeyDown=${e => e.key === "Enter" && savePw()}/>${pwErr && html`<p class="sm err-t">${pwErr}</p>`}<button class="btn" type="button" disabled=${busy || !pw || !pw2} onClick=${() => savePw()}>${tr(busy ? "Saving…" : "Save my password")}</button>${why === "code" && html`<button class="btn g" type="button" disabled=${busy} onClick=${() => done(pend)}>${tr("Not now, maybe later")}</button>`}</div></div></div>`;
   }
   if (step)
     return html`<div class="app"><${Top} back=${() => setStep(0)}/>${!sbOn && html`<div class="toast" key=${code}>${tr("Email from DropBy: your code is")} ${code}</div>`}<div class="scr rise auth-screen verify-screen"><${Hc}/><div class="col verify-col"><span class="rate-badge"><${Ic} n="mail"/></span><h1>Enter the 6-digit code</h1><p class="mu sm">${tr("Code sent to")} ${f.e}. ${sbOn ? "" : tr("Demo mode: no real email is sent. Your code is") + " " + code + ". "}${tr(sbOn ? "It expires in 1 hour." : "It expires in 2 minutes.")}</p><${Pin} key=${exp} len=${CODE_LEN} onDone=${check}/>${(locked || expired) && html`<p class="sm" style=${{ color: "#b3402a" }}>${tr(locked ? "Too many attempts. Try again in" : "Code expired. Request a new one.")}${locked ? " " + Math.ceil((lock - Date.now()) / 1000) + "s" : ""}</p>`}${err === "net" && html`<p class="sm" style=${{ color: "#b3402a" }}>${tr("Couldn't send the code. Check your connection and try again.") + (errMsg ? " [" + errMsg + "]" : "")}</p>`}<button class="btn g" type="button" disabled=${cl > 0 || busy} onClick=${() => send()}>${cl > 0 ? tr("Resend code in") + " " + cl + "s" : tr("Resend code")}</button>${sbOn && html`<p class="sm spam-note"><b>${tr("No email?")}</b> ${tr("It is almost always in your spam (junk) folder. Open it there and mark it as not spam, so the next codes arrive normally.")}</p>`}</div></div></div>`;
@@ -3317,7 +3360,18 @@ ${
       setLe(f.e);
       setMode("login");
     }}>Log in instead</button>`
-  }<input class="in" placeholder="Phone number" inputmode="tel" value=${f.p} onInput=${e => setF({ ...f, p: e.target.value })}/>${f.p && !np && html`<p class="sm" style=${{ color: "#b3402a", margin: "-6px 4px 0" }}>${tr("Enter a valid Algerian mobile number (05, 06 or 07)")}</p>`}<p class="sm mu" style=${{ margin: "-6px 4px 0" }}>${tr("Only used so your runner or customer can call you.")}</p>${LIVE && (uiLanguage === "fr" ? html`<p class="sm mu legal-note">En créant un compte, tu acceptes les <button type="button" class="lk" onClick=${() => openLegal("terms")}>conditions d’utilisation</button> et la <button type="button" class="lk" onClick=${() => openLegal("privacy")}>politique de confidentialité</button>.</p>` : html`<p class="sm mu legal-note">By creating an account you accept the <button type="button" class="lk" onClick=${() => openLegal("terms")}>terms of use</button> and the <button type="button" class="lk" onClick=${() => openLegal("privacy")}>privacy policy</button>.</p>`)}
+  }<input class="in" placeholder="Phone number" inputmode="tel" value=${f.p} onInput=${e => setF({ ...f, p: e.target.value })}/>${f.p && !np && html`<p class="sm" style=${{ color: "#b3402a", margin: "-6px 4px 0" }}>${tr("Enter a valid Algerian mobile number (05, 06 or 07)")}</p>`}<p class="sm mu" style=${{ margin: "-6px 4px 0" }}>${tr("Only used so your runner or customer can call you.")}</p>${
+    LIVE &&
+    html`<input class="in" type="password" autocomplete="new-password" placeholder=${tr("Create a password (8 characters or more)")} value=${pw} onInput=${e => setPw(e.target.value)}/><input class="in" type="password" autocomplete="new-password" placeholder=${tr("Type the password again")} value=${pw2} onInput=${e => setPw2(e.target.value)}/>${
+      (pw &&
+        pw.length < 8 &&
+        html`<p class="sm err-t" style=${{ margin: "-6px 4px 0" }}>${tr("Use at least 8 characters.")}</p>`) ||
+      (pw2 &&
+        pw !== pw2 &&
+        html`<p class="sm err-t" style=${{ margin: "-6px 4px 0" }}>${tr("The two passwords don't match.")}</p>`) ||
+      html`<p class="sm mu" style=${{ margin: "-6px 4px 0" }}>${tr("You'll log in with your email and this password. Forgot it? We send you a code by email.")}</p>`
+    }`
+  }${LIVE && (uiLanguage === "fr" ? html`<p class="sm mu legal-note">En créant un compte, tu acceptes les <button type="button" class="lk" onClick=${() => openLegal("terms")}>conditions d’utilisation</button> et la <button type="button" class="lk" onClick=${() => openLegal("privacy")}>politique de confidentialité</button>.</p>` : html`<p class="sm mu legal-note">By creating an account you accept the <button type="button" class="lk" onClick=${() => openLegal("terms")}>terms of use</button> and the <button type="button" class="lk" onClick=${() => openLegal("privacy")}>privacy policy</button>.</p>`)}
 <select class="in" aria-label="Faculty" value=${f.fac} onChange=${e => setF({ ...f, fac: e.target.value })}>${CAMPUSES.map(z => html`<option>${z}</option>`)}</select>
 ${role === "r" && html`<label class="card row" style=${{ cursor: "pointer" }}><${Ic} n="up"/><span class="sm" style=${{ flex: 1 }}>${tr(img ? "Student ID attached" : "Upload your UBMA student ID card")}</span>${img && html`<img src=${img} alt="ID preview" style=${{ width: 48, height: 32, objectFit: "cover", borderRadius: 6 }}/>`}<input type="file" accept="image/*" hidden onChange=${up}/></label>`}
 ${err === "phone" && html`<p class="sm" style=${{ color: "#b3402a" }}>${tr("This phone number is already used by another account.")}</p>`}${isBlocked && html`<p class="sm" style=${{ color: "#b3402a" }}>${tr("This account can't register as a runner.")}</p>`}${err === "net" && html`<p class="sm" style=${{ color: "#b3402a" }}>${tr("Couldn't send the code. Check your connection and try again.") + (errMsg ? " [" + errMsg + "]" : "")}</p>`}<button class="btn" disabled=${!ok} onClick=${() => {
@@ -4068,7 +4122,7 @@ function QRScanner({ onCode, close, note }) {
       stop();
     };
   }, []);
-  return html`<div class="qr-scan"><div class="qr-cam"><video ref=${v} playsinline muted></video><canvas ref=${c} hidden></canvas><i class="qr-frame"></i></div>${(note || msg) && html`<p class=${"sm qr-note" + (msg ? " err" : "")} role="status">${msg || note}</p>`}<button type="button" class="btn g" onClick=${close}>${tr("Type the code instead")}</button></div>`;
+  return html`<div class="qr-scan"><div class=${"qr-cam" + (msg ? " off" : "")}><video ref=${v} playsinline muted></video><canvas ref=${c} hidden></canvas><div class="qr-ov" aria-hidden="true"><i class="k tl"></i><i class="k tr"></i><i class="k bl"></i><i class="k br"></i><i class="qr-line"></i></div><span class="qr-hint">${tr("Point at the customer's QR code")}</span><button type="button" class="qr-x" aria-label=${tr("Close the camera")} onClick=${close}><${Ic} n="x"/></button>${msg && html`<p class="qr-msg" role="status">${msg}</p>`}</div>${note && !msg && html`<p class="sm qr-note" role="status">${note}</p>`}</div>`;
 }
 
 const LEGAL = {
@@ -5765,8 +5819,8 @@ function Runner({ me, st, orders, setOrders, chat, send, pop, setPop, again, add
             });
             return true;
           }}/>`
-        : html`<button type="button" class="btn qr-btn" onClick=${() => setScan(true)}><${Ic} n="cam"/>${tr("Scan the customer's QR code")}</button><p class="sm mu qr-or">${tr("or type the 4-digit code")}</p><${Pin} onDone=${fin} label="Confirm hand-off"/>`
-    }<//>`
+        : html`<button type="button" class="btn qr-btn" onClick=${() => setScan(true)}><${Ic} n="cam"/>${tr("Scan the customer's QR code")}</button>`
+    }<p class="sm mu qr-or">${tr("or type the 4-digit code")}</p><${Pin} onDone=${fin} label="Confirm hand-off" auto=${!scan}/><//>`
   }${ch && html`<${act && act.live ? LiveChat : Chat} o=${act} msgs=${chat} side="r" send=${send} close=${() => setCh(false)}/>`}</div>`;
 }
 
