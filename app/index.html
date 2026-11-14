@@ -1049,6 +1049,15 @@ body,button,input,select,textarea{font-family:var(--e-font)}
 :root .msec-sent{display:block;height:1px}
 :root .msec-bar.stuck{background:rgba(248,250,245,.97);box-shadow:0 calc(-58px - env(safe-area-inset-top,0px)) 0 0 rgba(248,250,245,.97),0 10px 18px -14px rgba(0,40,25,.35)}
 :root[data-theme="dark"] .msec-bar.stuck{background:rgba(9,52,37,.97);box-shadow:0 calc(-58px - env(safe-area-inset-top,0px)) 0 0 rgba(9,52,37,.97),0 10px 18px -14px rgba(0,0,0,.6)}
+/* one-time code field (style B) */
+:root .pin1{display:flex;flex-direction:column;gap:14px;width:100%;margin-top:6px}
+:root .pin1-in{width:100%;border:0;border-bottom:2px solid var(--e-em);border-radius:0;background:transparent;text-align:center;font:600 34px/1.2 ui-monospace,"SF Mono",Menlo,Consolas,monospace;letter-spacing:.45em;text-indent:.45em;padding:12px 0;color:var(--tx);outline:none;caret-color:var(--e-em);box-shadow:none}
+:root .pin1-in::placeholder{color:var(--mu);opacity:.45}
+:root .pin1-in:focus{border-bottom-width:3px}
+:root .pin1-btn{width:100%}
+:root .pin1 .pin-bad{text-align:center;margin:-4px 0 0}
+:root .shake2{animation:sh .4s}
+:root[data-theme="dark"] .pin1-in{color:#EAF5EE;border-bottom-color:#3DDC97}
 
 </style>
 </head>
@@ -2049,7 +2058,10 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
     "Automatique : {c}. DropBy choisit le campus où tu te trouves.",
   "Section, e.g. Pizzas, Drinks": "Section, ex. Pizzas, Boissons",
   Section: "Section",
-  Add: "Ajouter"
+  Add: "Ajouter",
+  "Confirm hand-off": "Valider la remise",
+  "Checking…": "Vérification…",
+  Code: "Code"
 };
 
 let uiLanguage = "fr";
@@ -2401,31 +2413,37 @@ const Nav = ({ tabs, cur, set }) =>
 const Sheet = ({ close, children, pin }) =>
   html`<div class="sheet" onClick=${e => e.target === e.currentTarget && close()}><div class=${pin ? "np" : ""}>${children}</div></div>`;
 
-function Pin({ onDone, len = 4 }) {
+// One-time code field (email code at sign-in, hand-off code): one field, the phone's own number keyboard.
+// iPhone and Android offer the code from the email/SMS above the keyboard (autocomplete="one-time-code").
+function Pin({ onDone, len = 4, label }) {
   const [v, setV] = useState(""),
-    [bad, setBad] = useState(0);
-  const put = k => setV(c => (k === "<" ? c.slice(0, -1) : c.length < len ? c + k : c));
+    [bad, setBad] = useState(0),
+    [busy, setBusy] = useState(false),
+    ref = useRef(null);
   useEffect(() => {
-    if (v.length < len) return;
-    const t = setTimeout(() => {
-      Promise.resolve(onDone(v)).then(ok => {
-        if (!ok) {
-          setBad(b => b + 1);
-          setV("");
-        }
-      });
-    }, 180);
+    const t = setTimeout(() => ref.current && ref.current.focus(), 300);
     return () => clearTimeout(t);
-  }, [v]);
-  useEffect(() => {
-    const h = e => {
-      if (/^\d$/.test(e.key)) put(e.key);
-      else if (e.key === "Backspace") put("<");
-    };
-    addEventListener("keydown", h);
-    return () => removeEventListener("keydown", h);
   }, []);
-  return html`<div key=${bad} class=${"pk" + (bad ? " shake" : "")}><div class=${"dots4" + (len > 4 ? " d6" : "")} aria-label=${v.length + " of " + len + " digits entered"}>${Array.from({ length: len }, (_, i) => i).map(i => html`<span class=${v[i] ? "f" : v.length === i ? "cur" : ""}>${v[i] || ""}</span>`)}</div><div class="keys">${"123456789".split("").map(k => html`<button onClick=${() => put(k)}>${k}</button>`)}<i></i><button onClick=${() => put("0")}>0</button><button class="gh" onClick=${() => put("<")} aria-label="Delete"><${Ic} n="back"/></button></div>${bad > 0 && !v && html`<p class="sm pin-bad" role="alert">${tr("Wrong code, try again.")}</p>`}</div>`;
+  const submit = async code => {
+    if (busy || code.length < len) return;
+    setBusy(true);
+    let ok = false;
+    try {
+      ok = await Promise.resolve(onDone(code));
+    } catch (e) {}
+    setBusy(false);
+    if (!ok) {
+      setBad(b => b + 1);
+      setV("");
+      ref.current && ref.current.focus();
+    }
+  };
+  const onInput = e => {
+    const d = e.target.value.replace(/\D/g, "").slice(0, len);
+    setV(d);
+    if (d.length === len) setTimeout(() => submit(d), 150);
+  };
+  return html`<div class=${"pin1" + (bad % 2 ? " shake" : bad ? " shake2" : "")}><input ref=${ref} class="pin1-in" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" maxlength=${len} value=${v} placeholder=${"·".repeat(len)} aria-label=${tr("Code")} onInput=${onInput} onKeyDown=${e => e.key === "Enter" && submit(v)}/>${bad > 0 && !v && html`<p class="sm pin-bad" role="alert">${tr("Wrong code, try again.")}</p>`}<button class="btn pin1-btn" type="button" disabled=${v.length < len || busy} onClick=${() => submit(v)}>${busy ? tr("Checking…") : tr(label || "Continue")}</button></div>`;
 }
 
 const normPhone = p => {
@@ -5291,7 +5309,7 @@ function Runner({ me, st, orders, setOrders, chat, send, pop, setPop, again, add
         setSel(null);
       }
     }}/>`
-  }${pm && act && html`<${Sheet} pin=${1} close=${() => setPm(false)}><div class="pinhd"><${Ic} n="shield"/><h2>Hand-off PIN</h2><p class="sm">${tr("Ask {c} for the 4-digit code, then collect {b} DA.").replace("{c}", act.c).replace("{b}", act.total)}</p><svg class="wv" viewBox="0 0 390 30" preserveAspectRatio="none" aria-hidden="true"><path d="M0 30V16C60 -2 130 -2 200 14S330 28 390 8V30Z" fill="#FDFBF7"/></svg></div><${Pin} onDone=${fin}/><//>`}${ch && html`<${act && act.live ? LiveChat : Chat} o=${act} msgs=${chat} side="r" send=${send} close=${() => setCh(false)}/>`}</div>`;
+  }${pm && act && html`<${Sheet} pin=${1} close=${() => setPm(false)}><div class="pinhd"><${Ic} n="shield"/><h2>Hand-off PIN</h2><p class="sm">${tr("Ask {c} for the 4-digit code, then collect {b} DA.").replace("{c}", act.c).replace("{b}", act.total)}</p><svg class="wv" viewBox="0 0 390 30" preserveAspectRatio="none" aria-hidden="true"><path d="M0 30V16C60 -2 130 -2 200 14S330 28 390 8V30Z" fill="#FDFBF7"/></svg></div><${Pin} onDone=${fin} label="Confirm hand-off"/><//>`}${ch && html`<${act && act.live ? LiveChat : Chat} o=${act} msgs=${chat} side="r" send=${send} close=${() => setCh(false)}/>`}</div>`;
 }
 
 const IDCard = ({ a }) =>
