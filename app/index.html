@@ -1912,6 +1912,7 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
   "Your runner": "Ton livreur",
   Customer: "Client",
   "Campus map · Sidi Amar": "Carte du campus · Sidi Amar",
+  "Campus map": "Carte du campus",
   "Open the campus map": "Ouvrir la carte du campus",
   "Map preview unavailable. Open OpenStreetMap in a new tab.":
     "Carte indisponible. Ouvrir OpenStreetMap dans un nouvel onglet.",
@@ -3158,7 +3159,10 @@ const OH = [8, 22],
     const d = new Date(t),
       h = d.getHours() + d.getMinutes() / 60,
       [a, b] = hrsOf(r);
-    return h >= a && h < b;
+    // same rule as create_order on the server: equal hours = open all day, close < open = open past midnight
+    if (r.closed) return false;
+    if (a === b % 24) return true;
+    return a < b ? h >= a && h < b : h >= a || h < b;
   },
   slots = r => {
     const o = [],
@@ -3756,7 +3760,9 @@ function QRScanner({ onCode, close, note }) {
   const v = useRef(null),
     c = useRef(null),
     st = useRef(null),
+    cb = useRef(onCode),
     [msg, setMsg] = useState("");
+  cb.current = onCode;
   useEffect(() => {
     let dead = false,
       raf = 0,
@@ -3777,17 +3783,19 @@ function QRScanner({ onCode, close, note }) {
         const tick = () => {
           if (dead) return;
           if (vid.readyState >= 2 && vid.videoWidth) {
-            const w = vid.videoWidth,
-              h = vid.videoHeight,
+            // a phone camera gives 1080p+: scan a smaller copy, fast enough for every frame
+            const k = Math.min(1, 720 / Math.max(vid.videoWidth, vid.videoHeight)),
+              w = Math.round(vid.videoWidth * k),
+              h = Math.round(vid.videoHeight * k),
               cv = c.current;
-            cv.width = w;
-            cv.height = h;
+            if (cv.width !== w) cv.width = w;
+            if (cv.height !== h) cv.height = h;
             const ctx = cv.getContext("2d", { willReadFrequently: true });
             ctx.drawImage(vid, 0, 0, w, h);
             const r = window.jsQR(ctx.getImageData(0, 0, w, h).data, w, h, { inversionAttempts: "dontInvert" });
             if (r && r.data && r.data !== last) {
               last = r.data;
-              if (onCode(r.data) === true) {
+              if (cb.current(r.data) === true) {
                 dead = true;
                 stop();
                 return;
@@ -4691,11 +4699,13 @@ function VendorSales({ rid }) {
 
 function LiveMap({ o, side, rating }) {
   const [real, setReal] = useState(false),
-    w = side === "c" ? o.run : { n: o.c, ph: o.cph || "0560 11 22 33" },
+    // a real order never shows the demo number: no phone known = no call button
+    w = side === "c" ? o.run : { n: o.c, ph: o.cph || (o.live ? "" : "0560 11 22 33") },
+    camp = campusOf(o.zone),
     e = eta(o),
     R = [null, [34, 128], [70, 60], [150, 98], [238, 150]],
     r = R[o.stage] || R[4];
-  return html`${side === "r" ? html`<${LiveLoc} mode="share"/>` : null}<div class="mapw">${o.live ? html`<${OrderMap} o=${o} side=${side}/>` : o.stage >= 1 && o.stage < 4 ? html`<${LiveLoc} mode="map"/>` : null}<button type="button" class="chip maptoggle" onClick=${() => setReal(v => !v)}>${tr(real ? "Schematic map" : "Real map")}</button>${real && html`<iframe class="mp" title="Real map" loading="lazy" style=${{ border: 0 }} src=${"https://www.google.com/maps?output=embed&q=" + encodeURIComponent((o.pointAddress || o.point) + ", Université Badji Mokhtar, Sidi Amar, Annaba")}></iframe>`}<svg class="mp" viewBox="0 0 300 340" role="img" aria-label="Live map" style=${{ cursor: "default", display: real ? "none" : undefined }}>${[
+  return html`${side === "r" ? html`<${LiveLoc} mode="share"/>` : null}<div class="mapw">${o.live ? html`<${OrderMap} o=${o} side=${side}/>` : o.stage >= 1 && o.stage < 4 ? html`<${LiveLoc} mode="map"/>` : null}<button type="button" class="chip maptoggle" onClick=${() => setReal(v => !v)}>${tr(real ? "Schematic map" : "Real map")}</button>${real && html`<iframe class="mp" title="Real map" loading="lazy" style=${{ border: 0 }} src=${"https://www.google.com/maps?output=embed&q=" + (o.mlat != null && o.mlng != null ? o.mlat + "," + o.mlng : encodeURIComponent((o.pointAddress || o.point) + ", Université Badji Mokhtar, " + camp + ", Annaba"))}></iframe>`}<svg class="mp" viewBox="0 0 300 340" role="img" aria-label="Live map" style=${{ cursor: "default", display: real ? "none" : undefined }}>${[
     [12, 16, 80, 70],
     [108, 16, 84, 50],
     [208, 16, 80, 86],
@@ -4705,7 +4715,7 @@ function LiveMap({ o, side, rating }) {
     [12, 194, 110, 60]
   ].map(
     b => html`<rect x=${b[0]} y=${b[1]} width=${b[2]} height=${b[3]} rx="10" fill="var(--s2)"/>`
-  )}<path d="M70 60V98H150V150H238" fill="none" stroke="var(--em)" stroke-width="3" stroke-linecap="round" class="dash"/><g transform="translate(70 60)"><rect x="-11" y="-11" width="22" height="22" rx="7" fill="var(--br2)"/><text y="4" text-anchor="middle" font-size="11" font-weight="540" fill="#fff">R</text></g><g transform="translate(238 150)"><circle class="ring" r="12" fill="var(--em)"/><circle r="8" fill="var(--em)"/><circle r="3" fill="#fff"/></g>${o.stage > 0 && html`<g style=${{ transform: `translate(${r[0]}px,${r[1]}px)`, transition: "transform 2.4s cubic-bezier(.6,0,.2,1)" }}><circle r="13" fill="var(--tx)"/><text y="4" text-anchor="middle" font-size="12" font-weight="540" fill="var(--bg)">D</text></g>`}</svg><div class="mapbadge"><span class="live-dot"></span>Campus map · Sidi Amar</div><div class="msh"><div class="row"><div class="av">${w ? w.n[0] : html`<span class="dots"><i></i><i></i><i></i></span>`}</div><div style=${{ minWidth: 0 }}><b>${w ? w.n : tr("Finding a runner")}</b>${rating && side === "c" && html`<span class="sm" style=${{ color: "#f2b01e", marginLeft: 6 }}>${rating}</span>`}<p class="sm mu">${w ? tr(side === "c" ? "Your runner" : "Customer") + " · " : ""}${tr("Meet at ")}${o.point}</p></div>${w && html`<a class="call sp" href=${"tel:" + w.ph.replace(/\s/g, "")} aria-label="Call"><${Ic} n="phone"/></a>`}</div><div class="row" style=${{ marginTop: 14 }}><span class="tag">${tr(STEPS[o.stage])}</span><span class="eta sp">${tr(e === null ? "Waiting" : e ? e + " min" : "Arrived")}</span></div></div></div>`;
+  )}<path d="M70 60V98H150V150H238" fill="none" stroke="var(--em)" stroke-width="3" stroke-linecap="round" class="dash"/><g transform="translate(70 60)"><rect x="-11" y="-11" width="22" height="22" rx="7" fill="var(--br2)"/><text y="4" text-anchor="middle" font-size="11" font-weight="540" fill="#fff">R</text></g><g transform="translate(238 150)"><circle class="ring" r="12" fill="var(--em)"/><circle r="8" fill="var(--em)"/><circle r="3" fill="#fff"/></g>${o.stage > 0 && html`<g style=${{ transform: `translate(${r[0]}px,${r[1]}px)`, transition: "transform 2.4s cubic-bezier(.6,0,.2,1)" }}><circle r="13" fill="var(--tx)"/><text y="4" text-anchor="middle" font-size="12" font-weight="540" fill="var(--bg)">D</text></g>`}</svg><div class="mapbadge"><span class="live-dot"></span>${tr("Campus map")} · ${camp}</div><div class="msh"><div class="row"><div class="av">${w ? w.n[0] : html`<span class="dots"><i></i><i></i><i></i></span>`}</div><div style=${{ minWidth: 0 }}><b>${w ? w.n : tr("Finding a runner")}</b>${rating && side === "c" && html`<span class="sm" style=${{ color: "#f2b01e", marginLeft: 6 }}>${rating}</span>`}<p class="sm mu">${w ? tr(side === "c" ? "Your runner" : "Customer") + " · " : ""}${tr("Meet at ")}${o.point}</p></div>${w && w.ph && html`<a class="call sp" href=${"tel:" + w.ph.replace(/\s/g, "")} aria-label="Call"><${Ic} n="phone"/></a>`}</div><div class="row" style=${{ marginTop: 14 }}><span class="tag">${tr(STEPS[o.stage])}</span><span class="eta sp">${tr(e === null ? "Waiting" : e ? e + " min" : "Arrived")}</span></div></div></div>`;
 }
 function LiveChat({ o, side, close }) {
   const [msgs, setMsgs] = useState([]),
@@ -4943,7 +4953,12 @@ function Customer({
     const other = cartRest && cartRest.id !== rest.id;
     setCart(c => {
       const base = other ? [] : c,
-        i = base.findIndex(y => y.n === item.n && y.o === item.o && (y.note || "") === (item.note || ""));
+        i = base.findIndex(
+          y =>
+            (item.id != null ? y.id === item.id : y.n === item.n) &&
+            y.o === item.o &&
+            (y.note || "") === (item.note || "")
+        );
       return i < 0 ? [...base, item] : base.map((y, j) => (j === i ? { ...y, q: y.q + item.q } : y));
     });
     setCartRest(rest);
@@ -5164,7 +5179,7 @@ function Customer({
       }<label class="srch pt-srch"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input type="search" placeholder="Search a place on campus" value=${pq} onInput=${e => setPq(e.target.value)}/></label>${vis.map(row)}${!vis.length && !cef.length && html`<p class="sm mu pt-none">${tr("No place found")}</p>`}${!q && all.length > 3 && html`<button type="button" class="pt-more" onClick=${() => setPall(v => !v)}>${tr(pall ? "Show less" : "Show more")}${pall ? "" : " (" + (all.length - 3) + ")"}<svg class=${"i" + (pall ? " up" : "")} viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>`}${cef.length > 0 && html`<div class="col pt-sec"><span class="mode-label">Cefos</span>${cef.map(row)}</div>`}`;
     })()}</div><div class="col"><h3>${tr("When?")}</h3><div class="chips" style=${{ flexWrap: "wrap" }}><button type="button" class=${"chip" + (!sched ? " on" : "")} disabled=${!openNow()} onClick=${() => setSched(0)}>${tr("Now")}</button>${slots(cro()).map(t => html`<button type="button" class=${"chip" + (sched === t ? " on" : "")} onClick=${() => setSched(t)}>${new Date(t).getDate() !== new Date().getDate() ? (uiLanguage === "fr" ? "Demain " : "Tomorrow ") : ""}${hhmm(t)}</button>`)}</div>${!openNow() && html`<p class="sm" style=${{ color: "#b3402a" }}>${tr("Closed now")} · ${fmtH(hrsOf(cro())[0])}-${fmtH(hrsOf(cro())[1])}</p>`}</div><div class="card col sum-card"><div class="row"><span>Meals</span><span class="sp pr">${sub} DA</span></div><div class="row"><span>${mode === "p" ? tr("Pickup, no delivery fee") : tr("Delivery, {km} km").replace("{km}", pickedPlace.km)}</span><span class="sp pr">${fee} DA</span></div>${cr > 0 && html`<div class="row"><span>${tr("Credit")}</span><span class="sp pr" style=${{ color: "var(--em)" }}>−${cr} DA</span></div>`}<div class="row"><span>Platform fee</span><span class="sp pr" style=${{ color: "var(--em)" }}>0 DA</span></div><div class="row"><h3>${tr(mode === "p" ? "Total, cash at the counter" : "Total, cash on delivery")}</h3><span class="sp pr" style=${{ fontSize: 20 }}>${sub + fee - cr} DA</span></div></div>${limit && html`<p class="sm" style=${{ color: "#b3402a" }}>${limit}</p>`}<button class="btn g co-clear" type="button" onClick=${clearCart}>Clear cart</button><div class="bar co-bar">${limit ? html`<p class="co-why">${limit}</p>` : !openNow() && !sched ? html`<p class="co-why">${tr("Closed now. Choose a later time below.")}</p>` : null}<button class="btn" type="button" disabled=${!cart.length || !!limit || (!openNow() && !sched)} onClick=${place}><span>Place order</span><span class="co-tot">${sub + fee - cr} DA</span></button></div></div></div>`;
   else if (rest)
-    body = html`<div class="app"><div class="scr rise rp" key=${"r" + rest.id}><div class="rp-hero"><${Pic} cls="rp-img" src=${rPic(rest)} alt=${rest.n}/><span class="rp-shade"></span><button class="rp-back" type="button" onClick=${() => setRest(null)} aria-label="Back"><${Ic} n="back"/></button></div><div class="rp-info"><h2>${rest.n}</h2><p class="mu sm">${tr(rest.t)} · ${rest.g}</p><div class="rp-chips"><span class="pill-s"><${Si} n="car"/>${tr("Delivery 100–150 DA")}</span><span class="pill-s"><${Si} n="store"/>${tr("Pickup 0 DA")}</span><span class="pill-s"><${Si} n="clock"/>${fmtH(hrsOf(rest)[0])}–${fmtH(hrsOf(rest)[1])}</span></div></div><div class="sec-h"><h3>Menu</h3><span class="mu sm">${rest.it.length}</span></div>${rest.it.length ? html`<${MenuSections} items=${rest.it} card=${i => html`<button class="drow" type="button" onClick=${() => setItem({ ...i, o: i.o[0], note: "", q: 1 })} aria-label=${"Add " + i.n}><span class="drow-media"><${Pic} cls="drow-img" src=${i.pic || foodPic(i.n)} alt=${i.n}/></span><span class="drow-tx"><b>${i.n}</b>${i.d && html`<span class="drow-d">${i.d}</span>`}<span class="drow-f"><span class="drow-p">${i.p} DA</span><span class="drow-add">${tr("Add")}</span></span></span></button>`}/>` : html`<div class="card mu sm">Menu coming soon. Check back later.</div>`}${cartBar}</div>${item && html`<${Sheet} close=${() => setItem(null)}><div class="col isheet"><div class="is-media"><${Pic} cls="is-img" src=${item.pic || foodPic(item.n)} alt=${item.n}/></div><div class="row"><h2>${item.n}</h2><span class="sp pr is-p">${item.p} DA</span></div>${cartRest && cartRest.id !== rest.id && html`<p class="sm mu">Your cart has items from ${cartRest.n}. Adding this dish starts a new cart.</p>`}<div class="chips">${rest.it.find(x => x.n === item.n).o.map(o => html`<button class=${"chip" + (item.o === o ? " on" : "")} onClick=${() => setItem({ ...item, o })}>${o}</button>`)}</div><input class="in" placeholder="Special instructions, e.g. no onions" value=${item.note} onInput=${e => setItem({ ...item, note: e.target.value })}/><div class="row"><div class="qty"><button class="qbtn" type="button" aria-label="Decrease quantity" onClick=${() => setItem({ ...item, q: Math.max(1, item.q - 1) })}>−</button><b>${item.q}</b><button class="qbtn" type="button" aria-label="Increase quantity" onClick=${() => setItem({ ...item, q: item.q + 1 })}>+</button></div><button class="btn sp" style=${{ width: "auto", flex: 1 }} onClick=${addItem}>Add, ${item.p * item.q} DA</button></div></div><//>`}</div>`;
+    body = html`<div class="app"><div class="scr rise rp" key=${"r" + rest.id}><div class="rp-hero"><${Pic} cls="rp-img" src=${rPic(rest)} alt=${rest.n}/><span class="rp-shade"></span><button class="rp-back" type="button" onClick=${() => setRest(null)} aria-label="Back"><${Ic} n="back"/></button></div><div class="rp-info"><h2>${rest.n}</h2><p class="mu sm">${tr(rest.t)} · ${rest.g}</p><div class="rp-chips"><span class="pill-s"><${Si} n="car"/>${tr("Delivery 100–150 DA")}</span><span class="pill-s"><${Si} n="store"/>${tr("Pickup 0 DA")}</span><span class="pill-s"><${Si} n="clock"/>${fmtH(hrsOf(rest)[0])}–${fmtH(hrsOf(rest)[1])}</span></div></div><div class="sec-h"><h3>Menu</h3><span class="mu sm">${rest.it.length}</span></div>${rest.it.length ? html`<${MenuSections} items=${rest.it} card=${i => html`<button class="drow" type="button" onClick=${() => setItem({ ...i, o: i.o[0], note: "", q: 1 })} aria-label=${"Add " + i.n}><span class="drow-media"><${Pic} cls="drow-img" src=${i.pic || foodPic(i.n)} alt=${i.n}/></span><span class="drow-tx"><b>${i.n}</b>${i.d && html`<span class="drow-d">${i.d}</span>`}<span class="drow-f"><span class="drow-p">${i.p} DA</span><span class="drow-add">${tr("Add")}</span></span></span></button>`}/>` : html`<div class="card mu sm">Menu coming soon. Check back later.</div>`}${cartBar}</div>${item && html`<${Sheet} close=${() => setItem(null)}><div class="col isheet"><div class="is-media"><${Pic} cls="is-img" src=${item.pic || foodPic(item.n)} alt=${item.n}/></div><div class="row"><h2>${item.n}</h2><span class="sp pr is-p">${item.p} DA</span></div>${cartRest && cartRest.id !== rest.id && html`<p class="sm mu">Your cart has items from ${cartRest.n}. Adding this dish starts a new cart.</p>`}<div class="chips">${((item.id != null ? rest.it.find(x => x.id === item.id) : rest.it.find(x => x.n === item.n)) || { o: [] }).o.map(o => html`<button class=${"chip" + (item.o === o ? " on" : "")} onClick=${() => setItem({ ...item, o })}>${o}</button>`)}</div><input class="in" placeholder="Special instructions, e.g. no onions" value=${item.note} onInput=${e => setItem({ ...item, note: e.target.value })}/><div class="row"><div class="qty"><button class="qbtn" type="button" aria-label="Decrease quantity" onClick=${() => setItem({ ...item, q: Math.max(1, item.q - 1) })}>−</button><b>${item.q}</b><button class="qbtn" type="button" aria-label="Increase quantity" onClick=${() => setItem({ ...item, q: item.q + 1 })}>+</button></div><button class="btn sp" style=${{ width: "auto", flex: 1 }} onClick=${addItem}>Add, ${item.p * item.q} DA</button></div></div><//>`}</div>`;
   else if (tab === "home")
     body = html`<div class="app"><div class="scr rise home2" key="home"><div class="hh"><span class="hh-av">${(me.n || "?").trim()[0]}</span><div class="hh-t"><span class="mu sm">Salam,</span><b>${me.n}</b></div></div><h1 class="hh-q">What are you eating today?</h1>${nt && html`<div class="card col notice"><b>${tr("Message from DropBy")}</b><p class="sm">${nt.text}</p><button class="chip" onClick=${() => dismissNote(nt)}>OK</button></div>`}<div class="hero-card"><${Pic} cls="hero-img" src=${HERO} alt=""/><span class="hero-shade"></span><div class="hero-txt"><span class="hero-k">0 DA</span><b>Platform fees. Always.</b><p>Real menu prices. 100–150 DA delivery, or pick it up yourself for free.</p></div></div><${RestList} restaurants=${LIVE ? restaurants.filter(r => r.z === sx.campus) : restaurants} onPick=${setRest}/>${LIVE && !restaurants.some(r => r.z === sx.campus) && html`<p class="sm mu">${tr("No restaurant on this campus yet. Coming soon!")}</p>`}${cartBar}</div></div>`;
   else if (tab === "track")

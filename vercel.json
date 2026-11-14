@@ -1,4 +1,8 @@
 {
+  "redirects": [
+    { "source": "/app", "destination": "/app/", "permanent": true },
+    { "source": "/resto", "destination": "/resto/", "permanent": true }
+  ],
   "headers": [
     {
       "source": "/(.*)",
