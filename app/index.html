@@ -1110,6 +1110,21 @@ body,button,input,select,textarea{font-family:var(--e-font)}
 :root[data-theme="dark"] .hand-k{color:#3DDC97}
 :root[data-theme="dark"] .hand-pin span{background:rgba(61,220,151,.14);color:#EAF5EE}
 
+/* passwords, courier notice, spam reminder, become a courier */
+:root .cr-note{gap:6px;padding:14px 16px;border-radius:18px;background:var(--e-fill,#e9f4ec);box-shadow:inset 0 0 0 1px var(--e-hair,#d5e6d9);text-align:left}
+:root .cr-note b{font-size:14px;color:var(--tx)}
+:root .cr-note p{margin:0;color:var(--mu);line-height:1.45}
+:root .spam-note{margin:4px 0 0;padding:12px 14px;border-radius:14px;background:var(--e-fill,#f3f5f0);color:var(--mu);line-height:1.45;text-align:left}
+:root .spam-note b{color:var(--tx)}
+:root .or-sep{display:flex;align-items:center;gap:12px;color:var(--mu);font-size:12px;margin:2px 0}
+:root .or-sep::before,:root .or-sep::after{content:"";flex:1;height:1px;background:var(--e-hair,#dde6dc)}
+:root .pw-link:disabled{opacity:.45}
+:root .bc-card{gap:8px}
+:root .bc-card p{margin:0}
+:root .bc-sheet{gap:12px}
+:root .bc-sheet h2{margin:0}
+:root .cr-check{margin:2px 0 8px;padding:10px 12px;border-radius:12px;background:#FFF4E5;color:#7A4B00}html[data-theme="dark"] .cr-check{background:#3a2c12;color:#F5D9A8}
+
 </style>
 </head>
 <body>
@@ -2125,7 +2140,59 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
   "or type the 4-digit code": "ou tape le code à 4 chiffres",
   "Show this QR to your courier, or give them the code.": "Montre ce QR code au livreur, ou donne-lui le code.",
   "To scan": "À scanner",
-  "To read out": "À dicter"
+  "To read out": "À dicter",
+  "Use at least 8 characters.": "Mets au moins 8 caractères.",
+  "The two passwords don't match.": "Les deux mots de passe ne sont pas identiques.",
+  "Choose a password different from your old one.": "Choisis un mot de passe différent de l’ancien.",
+  "This password is too weak. Use at least 8 characters, with letters and numbers.":
+    "Ce mot de passe est trop faible. Mets au moins 8 caractères, avec des lettres et des chiffres.",
+  "Couldn't save the password. Check your connection and try again.":
+    "Impossible d’enregistrer le mot de passe. Vérifie ta connexion et réessaie.",
+  "Create your password": "Crée ton mot de passe",
+  "Next time, log in with your email and this password.":
+    "La prochaine fois, connecte-toi avec ton e-mail et ce mot de passe.",
+  "Choose a new password": "Choisis un nouveau mot de passe",
+  "Your email is confirmed. Pick a new password for your account.":
+    "Ton e-mail est confirmé. Choisis un nouveau mot de passe pour ton compte.",
+  "Add a password?": "Ajouter un mot de passe ?",
+  "Optional: next time you can log in with it instead of waiting for a code.":
+    "Facultatif : la prochaine fois, tu pourras te connecter avec, sans attendre de code.",
+  "New password (8 characters or more)": "Nouveau mot de passe (8 caractères ou plus)",
+  "Type it again": "Retape-le",
+  "Saving…": "Enregistrement…",
+  "Save my password": "Enregistrer mon mot de passe",
+  "Not now, maybe later": "Pas maintenant",
+  "No email?": "Pas reçu l’e-mail ?",
+  "It is almost always in your spam (junk) folder. Open it there and mark it as not spam, so the next codes arrive normally.":
+    "Il est presque toujours dans tes spams (courrier indésirable). Ouvre-le là-bas et marque-le « non spam » : les prochains codes arriveront normalement.",
+  "This email isn't confirmed yet. Get a code by email below.":
+    "Cet e-mail n’est pas encore confirmé. Reçois un code par e-mail juste en dessous.",
+  "Forgot your password?": "Mot de passe oublié ?",
+  "or, without a password": "ou, sans mot de passe",
+  "Get a login code by email": "Recevoir un code de connexion par e-mail",
+  "Type your email first.": "Écris d’abord ton e-mail.",
+  "First name (as on your student card)": "Prénom (comme sur ta carte d’étudiant)",
+  "Last name (as on your student card)": "Nom (comme sur ta carte d’étudiant)",
+  "Before you apply as a courier": "Avant de devenir livreur",
+  "Type your real first and last name, exactly as on your UBMA student card. If the name in the app doesn't match the card, your account will be refused.":
+    "Écris ton vrai prénom et ton vrai nom, exactement comme sur ta carte d’étudiant UBMA. Si le nom dans l’application ne correspond pas à la carte, ton compte sera refusé.",
+  "Add a clear photo of the whole card, front side, with your name readable.":
+    "Ajoute une photo nette de la carte entière, côté recto, avec ton nom bien lisible.",
+  "This isn't open yet. Try again in a few days.": "Ce n’est pas encore ouvert. Réessaie dans quelques jours.",
+  "You already have a courier application.": "Tu as déjà une demande de livreur.",
+  "Check your first and last name: letters only, as on your card.":
+    "Vérifie ton prénom et ton nom : uniquement des lettres, comme sur ta carte.",
+  "Become a courier": "Devenir livreur",
+  "Earn 100 to 150 DA per delivery, between classes. On foot or by car.":
+    "Gagne 100 à 150 DA par livraison, entre deux cours. À pied ou en voiture.",
+  "Apply with my student card": "Postuler avec ma carte d’étudiant",
+  "Sending…": "Envoi…",
+  "Send my application": "Envoyer ma demande",
+  "While we check your card, you can keep ordering food as usual.":
+    "Pendant qu’on vérifie ta carte, tu peux continuer à commander comme d’habitude.",
+  "Log in": "Se connecter",
+  "Password": "Mot de passe",
+  "Approve only if the first and last name in the app match the student card exactly.": "Valide seulement si le prénom et le nom dans l’app correspondent exactement à la carte d’étudiant."
 };
 
 let uiLanguage = "fr";
@@ -2943,6 +3010,15 @@ function Auth({ def, onDone, onDemo, language, onLanguage, blocked }) {
     [cool, setCool] = useState(0),
     [busy, setBusy] = useState(false),
     [errMsg, setErrMsg] = useState(""),
+    // passwords: the email code proves the address, then the student sets (or resets) a password
+    [why, setWhy] = useState("signup"), // why the code was sent: signup | code (log in without password) | reset
+    [pend, setPend] = useState(null),
+    [pw, setPw] = useState(""),
+    [pw2, setPw2] = useState(""),
+    [pwErr, setPwErr] = useState(""),
+    [lpw, setLpw] = useState(""),
+    [first, setFirst] = useState(""),
+    [last, setLast] = useState(""),
     [, setTick] = useState(0);
   useEffect(() => {
     if (!step) return;
@@ -2957,6 +3033,7 @@ function Auth({ def, onDone, onDemo, language, onLanguage, blocked }) {
       !busy &&
       (LIVE || !getAcc(role, ne)) &&
       f.n.trim().length > 1 &&
+      (role !== "r" || (first.trim().length > 1 && last.trim().length > 1)) &&
       !!ne &&
       !!np &&
       (role === "r" ? img : true),
@@ -3047,19 +3124,73 @@ function Auth({ def, onDone, onDemo, language, onLanguage, blocked }) {
         if (!sess || !sess.access_token) return fail();
         sbSave({ ...sess, expires_at: sess.expires_at || Math.floor(Date.now() / 1000) + (sess.expires_in || 3600) });
         const p = (await sbProfile(sess)) || {};
-        done({
+        setPend({
           n: p.full_name || f.n,
           p: p.phone || f.p,
           uid: sess.user && sess.user.id,
           role: p.role,
           campus: p.campus || campusOf(f.fac)
         });
+        setPw("");
+        setPw2("");
+        setPwErr("");
+        setStep(2);
         return true;
       })
       .catch(() => fail());
   };
+  const savePw = async () => {
+    if (pw.length < 8) return setPwErr(tr("Use at least 8 characters."));
+    if (pw !== pw2) return setPwErr(tr("The two passwords don't match."));
+    setBusy(true);
+    setPwErr("");
+    try {
+      const tk = await sbToken();
+      const r = await fetch(SB.url + "/auth/v1/user", {
+        method: "PUT",
+        headers: { ...sbHead, Authorization: "Bearer " + tk },
+        body: JSON.stringify({ password: pw })
+      });
+      if (!r.ok) {
+        let m = "";
+        try {
+          const j = await r.json();
+          m = j.msg || j.message || j.error_description || j.error_code || "";
+        } catch {}
+        throw new Error(m || "HTTP " + r.status);
+      }
+      setBusy(false);
+      done(pend);
+    } catch (e) {
+      setBusy(false);
+      const m = String((e && e.message) || "");
+      setPwErr(
+        tr(
+          /same|different/i.test(m)
+            ? "Choose a password different from your old one."
+            : /least|short|weak|character/i.test(m)
+              ? "This password is too weak. Use at least 8 characters, with letters and numbers."
+              : "Couldn't save the password. Check your connection and try again."
+        )
+      );
+    }
+  };
+  if (step === 2) {
+    const T = {
+      signup: ["Create your password", "Next time, log in with your email and this password."],
+      reset: ["Choose a new password", "Your email is confirmed. Pick a new password for your account."],
+      code: ["Add a password?", "Optional: next time you can log in with it instead of waiting for a code."]
+    }[why] || ["Create your password", ""];
+    return html`<div class="app"><${Top}/><div class="scr rise auth-screen verify-screen"><${Hc}/><div class="col verify-col"><span class="rate-badge"><${Ic} n="shield"/></span><h1>${tr(T[0])}</h1><p class="mu sm">${tr(T[1])}</p><input class="in" type="password" autocomplete="new-password" placeholder=${tr("New password (8 characters or more)")} value=${pw} onInput=${e => {
+      setPw(e.target.value);
+      setPwErr("");
+    }}/><input class="in" type="password" autocomplete="new-password" placeholder=${tr("Type it again")} value=${pw2} onInput=${e => {
+      setPw2(e.target.value);
+      setPwErr("");
+    }} onKeyDown=${e => e.key === "Enter" && savePw()}/>${pwErr && html`<p class="sm err-t">${pwErr}</p>`}<button class="btn" type="button" disabled=${busy || !pw || !pw2} onClick=${savePw}>${tr(busy ? "Saving…" : "Save my password")}</button>${why === "code" && html`<button class="btn g" type="button" disabled=${busy} onClick=${() => done(pend)}>${tr("Not now, maybe later")}</button>`}</div></div></div>`;
+  }
   if (step)
-    return html`<div class="app"><${Top} back=${() => setStep(0)}/>${!sbOn && html`<div class="toast" key=${code}>${tr("Email from DropBy: your code is")} ${code}</div>`}<div class="scr rise auth-screen verify-screen"><${Hc}/><div class="col verify-col"><span class="rate-badge"><${Ic} n="mail"/></span><h1>Enter the 6-digit code</h1><p class="mu sm">${tr("Code sent to")} ${f.e}. ${sbOn ? "" : tr("Demo mode: no real email is sent. Your code is") + " " + code + ". "}${tr(sbOn ? "It expires in 1 hour." : "It expires in 2 minutes.")}</p><${Pin} key=${exp} len=${CODE_LEN} onDone=${check}/>${(locked || expired) && html`<p class="sm" style=${{ color: "#b3402a" }}>${tr(locked ? "Too many attempts. Try again in" : "Code expired. Request a new one.")}${locked ? " " + Math.ceil((lock - Date.now()) / 1000) + "s" : ""}</p>`}${err === "net" && html`<p class="sm" style=${{ color: "#b3402a" }}>${tr("Couldn't send the code. Check your connection and try again.") + (errMsg ? " [" + errMsg + "]" : "")}</p>`}<button class="btn g" type="button" disabled=${cl > 0 || busy} onClick=${() => send()}>${cl > 0 ? tr("Resend code in") + " " + cl + "s" : tr("Resend code")}</button></div></div></div>`;
+    return html`<div class="app"><${Top} back=${() => setStep(0)}/>${!sbOn && html`<div class="toast" key=${code}>${tr("Email from DropBy: your code is")} ${code}</div>`}<div class="scr rise auth-screen verify-screen"><${Hc}/><div class="col verify-col"><span class="rate-badge"><${Ic} n="mail"/></span><h1>Enter the 6-digit code</h1><p class="mu sm">${tr("Code sent to")} ${f.e}. ${sbOn ? "" : tr("Demo mode: no real email is sent. Your code is") + " " + code + ". "}${tr(sbOn ? "It expires in 1 hour." : "It expires in 2 minutes.")}</p><${Pin} key=${exp} len=${CODE_LEN} onDone=${check}/>${(locked || expired) && html`<p class="sm" style=${{ color: "#b3402a" }}>${tr(locked ? "Too many attempts. Try again in" : "Code expired. Request a new one.")}${locked ? " " + Math.ceil((lock - Date.now()) / 1000) + "s" : ""}</p>`}${err === "net" && html`<p class="sm" style=${{ color: "#b3402a" }}>${tr("Couldn't send the code. Check your connection and try again.") + (errMsg ? " [" + errMsg + "]" : "")}</p>`}<button class="btn g" type="button" disabled=${cl > 0 || busy} onClick=${() => send()}>${cl > 0 ? tr("Resend code in") + " " + cl + "s" : tr("Resend code")}</button>${sbOn && html`<p class="sm spam-note"><b>${tr("No email?")}</b> ${tr("It is almost always in your spam (junk) folder. Open it there and mark it as not spam, so the next codes arrive normally.")}</p>`}</div></div></div>`;
   const LB = html`<div class="language-entry" role="group" aria-label="Language"><button class=${activeLang === "fr" ? "on" : ""} onClick=${() => changeLang("fr")}>Français</button><button class=${activeLang === "en" ? "on" : ""} onClick=${() => changeLang("en")}>English</button></div>`,
     RB = html`<div class="row">${[
       ["c", "Customer"],
@@ -3074,10 +3205,49 @@ function Auth({ def, onDone, onDemo, language, onLanguage, blocked }) {
         ? "Delivery runner: do you already have an account, or are you new here?"
         : "Do you already have an account, or are you new here?"
     );
-    return html`<div class="app"><${Top}/><div class="scr rise auth-screen"><${Hc}/><div class="lang-top">${LB}</div><div class="col"><h1 class="qq">${q.split(" ").map((w, i) => html`<span class="qw" style=${{ "--d": i }}>${w} </span>`)}</h1><button class="qopt" style=${{ "--d": 0 }} onClick=${() => setMode("login")}><span class="qi"><${Ic} n="user"/></span><div><b>I already have an account</b><span class="sm mu">Log in with your email</span></div></button><button class="qopt alt" style=${{ "--d": 1 }} onClick=${() => setMode("new")}><span class="qi"><${Ic} n="plus"/></span><div><b>I'm new here</b><span class="sm mu">Create your account in a minute</span></div></button></div></div></div>`;
+    return html`<div class="app"><${Top}/><div class="scr rise auth-screen"><${Hc}/><div class="lang-top">${LB}</div><div class="col"><h1 class="qq">${q.split(" ").map((w, i) => html`<span class="qw" style=${{ "--d": i }}>${w} </span>`)}</h1><button class="qopt" style=${{ "--d": 0 }} onClick=${() => setMode("login")}><span class="qi"><${Ic} n="user"/></span><div><b>I already have an account</b><span class="sm mu">Log in with your email</span></div></button><button class="qopt alt" style=${{ "--d": 1 }} onClick=${() => setMode("new")}><span class="qi"><${Ic} n="plus"/></span><div><b>I'm new here</b><span class="sm mu">Create your account in a minute</span></div></button>${role === "r" && html`<${CourierNotice}/>`}</div></div></div>`;
   }
   if (mode === "login") {
     const nl = normEmail(le),
+      pwGo = async () => {
+        if (!nl || !lpw || busy) return;
+        setBusy(true);
+        setErr("");
+        try {
+          const r = await fetch(SB.url + "/auth/v1/token?grant_type=password", {
+            method: "POST",
+            headers: sbHead,
+            body: JSON.stringify({ email: nl, password: lpw })
+          });
+          const j = await r.json().catch(() => ({}));
+          if (!r.ok || !j.access_token) {
+            setBusy(false);
+            setErr(/confirm/i.test(j.error_description || j.msg || j.error_code || "") ? "unconf" : "pw");
+            return;
+          }
+          const sess = { ...j, expires_at: j.expires_at || Math.floor(Date.now() / 1000) + (j.expires_in || 3600) };
+          sbSave(sess);
+          const p = (await sbProfile(sess)) || {};
+          setBusy(false);
+          onDone(
+            role,
+            {
+              n: p.full_name || "",
+              e: nl,
+              p: p.phone || "",
+              fac: "Sidi Amar",
+              uid: sess.user && sess.user.id,
+              role: p.role,
+              campus: p.campus || "Sidi Amar"
+            },
+            true
+          );
+        } catch (e) {
+          setBusy(false);
+          setErrMsg("");
+          setErr("net");
+        }
+      },
       go = async () => {
         const a = getAcc(role, nl);
         if (!sbOn && !a) {
@@ -3105,26 +3275,19 @@ function Auth({ def, onDone, onDemo, language, onLanguage, blocked }) {
         setErr("");
         setMode("new");
       }}>I'm new here</button>`
-    }${err === "net" && html`<p class="sm" style=${{ color: "#b3402a" }}>${tr("Couldn't send the code. Check your connection and try again.") + (errMsg ? " [" + errMsg + "]" : "")}</p>`}${err === "bl" && html`<p class="sm" style=${{ color: "#b3402a" }}>${tr("This account can't register as a runner.")}</p>`}<button class="btn" disabled=${!nl || busy} onClick=${go}>Send my code</button>${
-      LIVE &&
-      html`<${PwLogin} email=${nl} onOk=${async j => {
-        const sess = { ...j, expires_at: j.expires_at || Math.floor(Date.now() / 1000) + (j.expires_in || 3600) };
-        sbSave(sess);
-        const p = (await sbProfile(sess)) || {};
-        onDone(
-          role,
-          {
-            n: p.full_name || "",
-            e: nl,
-            p: p.phone || "",
-            fac: "Sidi Amar",
-            uid: sess.user && sess.user.id,
-            role: p.role,
-            campus: p.campus || "Sidi Amar"
-          },
-          true
-        );
-      }}/>`
+    }${err === "net" && html`<p class="sm" style=${{ color: "#b3402a" }}>${tr("Couldn't send the code. Check your connection and try again.") + (errMsg ? " [" + errMsg + "]" : "")}</p>`}${err === "bl" && html`<p class="sm" style=${{ color: "#b3402a" }}>${tr("This account can't register as a runner.")}</p>`}${
+      LIVE
+        ? html`<input class="in" type="password" autocomplete="current-password" placeholder=${tr("Password")} value=${lpw} onInput=${e => {
+            setLpw(e.target.value);
+            setErr("");
+          }} onKeyDown=${e => e.key === "Enter" && pwGo()}/>${err === "pw" && html`<p class="sm err-t">${tr("Wrong email or password.")}</p>`}${err === "unconf" && html`<p class="sm err-t">${tr("This email isn't confirmed yet. Get a code by email below.")}</p>`}<button class="btn" type="button" disabled=${!nl || !lpw || busy} onClick=${pwGo}>${tr("Log in")}</button><button type="button" class="pw-link" disabled=${!nl || busy} onClick=${() => {
+            setWhy("reset");
+            go();
+          }}>${tr("Forgot your password?")}</button><div class="or-sep"><span>${tr("or, without a password")}</span></div><button class="btn g" type="button" disabled=${!nl || busy} onClick=${() => {
+            setWhy("code");
+            go();
+          }}>${tr("Get a login code by email")}</button>${!nl && html`<p class="sm mu" style=${{ margin: "-4px 4px 0" }}>${tr("Type your email first.")}</p>`}`
+        : html`<button class="btn" disabled=${!nl || busy} onClick=${go}>Send my code</button>`
     }</div></div></div>`;
   }
   return html`<div class="app"><${Top} back=${() => setMode(null)}/><div class="scr rise auth-screen"><${Hc}/><div class="col"><div class="welcome-heading"><h1 class="welcome-title">${tr("Welcome!")}</h1></div><div class="row">${[
@@ -3134,7 +3297,17 @@ function Auth({ def, onDone, onDemo, language, onLanguage, blocked }) {
     ([k, l]) =>
       html`<button class=${"card tap" + (role === k ? " on" : "")} style=${{ flex: 1, fontWeight: 480, fontSize: 14 }} onClick=${() => setRole(k)}>${tr(l)}</button>`
   )}</div>
-<input class="in" placeholder="Full name" value=${f.n} onInput=${e => setF({ ...f, n: e.target.value })}/><input class="in" type="email" autocomplete="email" inputmode="email" autocapitalize="none" placeholder="Email address" value=${f.e} onInput=${e => {
+${
+  role === "r"
+    ? html`<${CourierNotice}/><input class="in" autocomplete="given-name" placeholder=${tr("First name (as on your student card)")} value=${first} onInput=${e => {
+        setFirst(e.target.value);
+        setF({ ...f, n: (e.target.value.trim() + " " + last.trim()).trim() });
+      }}/><input class="in" autocomplete="family-name" placeholder=${tr("Last name (as on your student card)")} value=${last} onInput=${e => {
+        setLast(e.target.value);
+        setF({ ...f, n: (first.trim() + " " + e.target.value.trim()).trim() });
+      }}/>`
+    : html`<input class="in" placeholder="Full name" value=${f.n} onInput=${e => setF({ ...f, n: e.target.value })}/>`
+}<input class="in" type="email" autocomplete="email" inputmode="email" autocapitalize="none" placeholder="Email address" value=${f.e} onInput=${e => {
     setF({ ...f, e: e.target.value });
     setErr("");
   }}/>${f.e && !ne && html`<p class="sm" style=${{ color: "#b3402a", margin: "-6px 4px 0" }}>${tr("Enter a valid email address")}</p>`}${
@@ -3147,7 +3320,80 @@ function Auth({ def, onDone, onDemo, language, onLanguage, blocked }) {
   }<input class="in" placeholder="Phone number" inputmode="tel" value=${f.p} onInput=${e => setF({ ...f, p: e.target.value })}/>${f.p && !np && html`<p class="sm" style=${{ color: "#b3402a", margin: "-6px 4px 0" }}>${tr("Enter a valid Algerian mobile number (05, 06 or 07)")}</p>`}<p class="sm mu" style=${{ margin: "-6px 4px 0" }}>${tr("Only used so your runner or customer can call you.")}</p>${LIVE && (uiLanguage === "fr" ? html`<p class="sm mu legal-note">En créant un compte, tu acceptes les <button type="button" class="lk" onClick=${() => openLegal("terms")}>conditions d’utilisation</button> et la <button type="button" class="lk" onClick=${() => openLegal("privacy")}>politique de confidentialité</button>.</p>` : html`<p class="sm mu legal-note">By creating an account you accept the <button type="button" class="lk" onClick=${() => openLegal("terms")}>terms of use</button> and the <button type="button" class="lk" onClick=${() => openLegal("privacy")}>privacy policy</button>.</p>`)}
 <select class="in" aria-label="Faculty" value=${f.fac} onChange=${e => setF({ ...f, fac: e.target.value })}>${CAMPUSES.map(z => html`<option>${z}</option>`)}</select>
 ${role === "r" && html`<label class="card row" style=${{ cursor: "pointer" }}><${Ic} n="up"/><span class="sm" style=${{ flex: 1 }}>${tr(img ? "Student ID attached" : "Upload your UBMA student ID card")}</span>${img && html`<img src=${img} alt="ID preview" style=${{ width: 48, height: 32, objectFit: "cover", borderRadius: 6 }}/>`}<input type="file" accept="image/*" hidden onChange=${up}/></label>`}
-${err === "phone" && html`<p class="sm" style=${{ color: "#b3402a" }}>${tr("This phone number is already used by another account.")}</p>`}${isBlocked && html`<p class="sm" style=${{ color: "#b3402a" }}>${tr("This account can't register as a runner.")}</p>`}${err === "net" && html`<p class="sm" style=${{ color: "#b3402a" }}>${tr("Couldn't send the code. Check your connection and try again.") + (errMsg ? " [" + errMsg + "]" : "")}</p>`}<button class="btn" disabled=${!ok} onClick=${() => send()}>Send my code</button></div></div></div>`;
+${err === "phone" && html`<p class="sm" style=${{ color: "#b3402a" }}>${tr("This phone number is already used by another account.")}</p>`}${isBlocked && html`<p class="sm" style=${{ color: "#b3402a" }}>${tr("This account can't register as a runner.")}</p>`}${err === "net" && html`<p class="sm" style=${{ color: "#b3402a" }}>${tr("Couldn't send the code. Check your connection and try again.") + (errMsg ? " [" + errMsg + "]" : "")}</p>`}<button class="btn" disabled=${!ok} onClick=${() => {
+    setWhy("signup");
+    send();
+  }}>Send my code</button></div></div></div>`;
+}
+
+// shown to anyone opening a courier account (first screen, sign-up, and "Become a courier")
+const CourierNotice = () =>
+  html`<div class="card col cr-note" role="note"><b>${tr("Before you apply as a courier")}</b><p class="sm">${tr("Type your real first and last name, exactly as on your UBMA student card. If the name in the app doesn't match the card, your account will be refused.")}</p><p class="sm">${tr("Add a clear photo of the whole card, front side, with your name readable.")}</p></div>`;
+// a student-ID photo, made lighter before it is sent (phone photos are often 5 MB or more)
+const shrinkImg = (src, max = 1600) =>
+  new Promise(res => {
+    const im = new Image();
+    im.onload = () => {
+      const k = Math.min(1, max / Math.max(im.width, im.height)),
+        c = document.createElement("canvas");
+      c.width = Math.round(im.width * k);
+      c.height = Math.round(im.height * k);
+      c.getContext("2d").drawImage(im, 0, 0, c.width, c.height);
+      try {
+        res(c.toDataURL("image/jpeg", 0.85));
+      } catch (e) {
+        res(src);
+      }
+    };
+    im.onerror = () => res(src);
+    im.src = src;
+  });
+// Settings → Become a courier: a customer applies with their real name and student card
+function BecomeCourier({ sx }) {
+  const [o, setO] = useState(false),
+    [fn, setFn] = useState(""),
+    [ln, setLn] = useState(""),
+    [img, setImg] = useState(null),
+    [busy, setBusy] = useState(false),
+    [err, setErr] = useState("");
+  const ok = fn.trim().length > 1 && ln.trim().length > 1 && !!img && !busy;
+  const pick = e => {
+    const x = e.target.files && e.target.files[0];
+    if (!x) return;
+    const r = new FileReader();
+    r.onload = async () => setImg(await shrinkImg(r.result));
+    r.readAsDataURL(x);
+  };
+  const go = async () => {
+    if (!ok) return;
+    setBusy(true);
+    setErr("");
+    const name = fn.trim().replace(/\s+/g, " ") + " " + ln.trim().replace(/\s+/g, " ");
+    try {
+      await sbRpc("become_courier", { p_first: fn, p_last: ln });
+    } catch (e) {
+      setBusy(false);
+      const m = String((e && e.message) || "");
+      return setErr(
+        /become_courier|function/i.test(m)
+          ? tr("This isn't open yet. Try again in a few days.")
+          : /already a courier/i.test(m)
+            ? tr("You already have a courier application.")
+            : /suspended/i.test(m)
+              ? tr("This account can't register as a runner.")
+              : /invalid name/i.test(m)
+                ? tr("Check your first and last name: letters only, as on your card.")
+                : m
+      );
+    }
+    setBusy(false);
+    setO(false);
+    sx.becameCourier(name, img); // the card photo is uploaded by the courier check in 16-app.js, with retries
+  };
+  return html`<div class="card col set-grp bc-card"><b>${tr("Become a courier")}</b><p class="sm mu">${tr("Earn 100 to 150 DA per delivery, between classes. On foot or by car.")}</p><button type="button" class="btn" onClick=${() => setO(true)}>${tr("Apply with my student card")}</button></div>${
+    o &&
+    html`<${Sheet} close=${() => !busy && setO(false)}><div class="col bc-sheet"><h2>${tr("Become a courier")}</h2><${CourierNotice}/><input class="in" autocomplete="given-name" placeholder=${tr("First name (as on your student card)")} value=${fn} onInput=${e => setFn(e.target.value)}/><input class="in" autocomplete="family-name" placeholder=${tr("Last name (as on your student card)")} value=${ln} onInput=${e => setLn(e.target.value)}/><label class="card row" style=${{ cursor: "pointer" }}><${Ic} n="up"/><span class="sm" style=${{ flex: 1 }}>${tr(img ? "Student ID attached" : "Upload your UBMA student ID card")}</span>${img && html`<img src=${img} alt="" style=${{ width: 48, height: 32, objectFit: "cover", borderRadius: 6 }}/>`}<input type="file" accept="image/*" hidden onChange=${pick}/></label>${err && html`<p class="sm err-t">${err}</p>`}<button type="button" class="btn" disabled=${!ok} onClick=${go}>${tr(busy ? "Sending…" : "Send my application")}</button><p class="sm mu">${tr("While we check your card, you can keep ordering food as usual.")}</p></div><//>`
+  }`;
 }
 
 const OH = [8, 22],
@@ -4067,36 +4313,6 @@ ${
     if (e.target === e.currentTarget && !busy) setAsk(false);
   }}><div class="lg-sh del-sh" role="dialog"><h2>${tr("Delete your account?")}</h2><p class="sm mu">${tr("Your name, phone number, email, positions and student-ID photo are erased. Past orders stay in our records without your name. This can't be undone.")}</p>${err && html`<p class="sm err-t">${err}</p>`}<button type="button" class="btn del-btn" disabled=${busy} onClick=${del}>${tr(busy ? "Deleting…" : "Delete permanently")}</button><button type="button" class="btn g" disabled=${busy} onClick=${() => setAsk(false)}>${tr("Keep my account")}</button></div></div>`
 }`;
-}
-function PwLogin({ email, onOk }) {
-  const [o, setO] = useState(false),
-    [pw, setPw] = useState(""),
-    [busy, setBusy] = useState(false),
-    [err, setErr] = useState("");
-  const go = async () => {
-    if (!email || !pw) return;
-    setBusy(true);
-    setErr("");
-    try {
-      const r = await fetch(SB.url + "/auth/v1/token?grant_type=password", {
-        method: "POST",
-        headers: sbHead,
-        body: JSON.stringify({ email, password: pw })
-      });
-      const j = await r.json().catch(() => ({}));
-      if (!r.ok || !j.access_token) throw new Error("bad");
-      await onOk(j);
-    } catch (e) {
-      setErr(tr("Wrong email or password."));
-    }
-    setBusy(false);
-  };
-  if (!o)
-    return html`<button type="button" class="pw-link" onClick=${() => setO(true)}>${tr("Log in with a password (test account)")}</button>`;
-  return html`<div class="col pw-box"><input class="in" type="password" autocomplete="current-password" placeholder=${tr("Password")} value=${pw} onInput=${e => {
-    setPw(e.target.value);
-    setErr("");
-  }}/>${err && html`<p class="sm err-t">${err}</p>`}<button type="button" class="btn g" disabled=${!email || !pw || busy} onClick=${go}>${tr("Log in with password")}</button></div>`;
 }
 
 function AdminDashLive() {
@@ -5219,7 +5435,7 @@ function Customer({
           }}>${tr("I collected my order")}</button></div>`
         }${cur.stage < 3 && (["sched", "find", "new"].includes(cur.vs) ? html`<button class="btn g" type="button" onClick=${() => setCancelStep(1)}>${tr("Cancel order")}</button>` : html`<p class="sm no-cancel">${tr("The restaurant accepted your order, so it can no longer be cancelled.")}</p>`)}${cur.vs === "sched" && html`<div class="card col"><b>${tr("Scheduled order")}</b><p class="sm mu">${tr("Scheduled for")} ${hhmm(cur.sched)}</p></div>`}${cur.stage === 0 && !!cur.ts && !cur.pickup && html`<div class="card col"><b>${tr(cur.vs === "new" ? "Waiting for the restaurant" : cur.released ? "Your runner dropped the order" : "Looking for a runner")}</b><p class="sm mu">${tr(cur.vs === "new" ? "The restaurant is confirming your order." : Date.now() - cur.ts >= WAIT_HELP ? "No runner yet. Add a tip so it stands out, or cancel." : "Runners nearby are being notified.")} ${tr("Auto-cancel in")} ${Math.max(0, Math.ceil((EXPIRE - (Date.now() - cur.ts)) / 1000))}s</p>${cur.vs !== "new" && Date.now() - cur.ts >= WAIT_HELP && (cur.boost || 0) < 3 && !cur.live && html`<button class="btn" type="button" onClick=${() => boost(cur)}>${tr("Add +50 DA tip")}</button>`}</div>`}${placedId === cur.id && cur.stage === 0 && html`<div class="card order-confirmation"><b>Order confirmed!</b><p class="sm">Your order is in. Follow its progress below.</p><button class="btn g" style=${{ display: cur.pickup ? "none" : undefined }} onClick=${onOpenRunner} hidden=${!!cur.live}>Open delivery demo</button>${cur.rid && !cur.live && html`<button class="btn g" onClick=${() => sx.openVendor(cur.rid)}>Open restaurant demo</button>`}</div>`}${cur.id === "demo1" && cur.stage < 4 && html`<div class="card demo-hint"><b>Delivery demo</b><p>Switch to Delivery guy above, accept the order, then advance the pickup steps. Enter this PIN to finish the hand-off.</p></div>`}${cur.vs === "new" && cur.stage >= 1 && cur.stage < 3 && html`<div class="card col vchip"><span class="vtag">${tr("Waiting for the restaurant")}</span><span class="sm mu">${tr("The restaurant is confirming your order.")}</span></div>`}${cur.vs && cur.vs !== "new" && cur.stage < 3 && html`<div class="card row vchip"><span class=${"vtag" + (cur.vs === "ready" ? " ok" : "")}>${tr(cur.vs === "ready" ? "Your order is ready at the restaurant" : "Preparing")}</span>${cur.vs === "prep" && html`<span class="sm mu sp">~${Math.max(0, Math.ceil((cur.at + cur.prep * 60000 - Date.now()) / 60000))} min</span>`}</div>`}<div class="stepper" style=${{ display: cur.pickup ? "none" : undefined }}>${STEPS.map((s, i) => html`<div class=${"stp" + (cur.stage > i || cur.stage === 4 ? " done" : cur.stage === i ? " cur" : "")}><span class="stp-dot">${cur.stage > i || cur.stage === 4 ? "✓" : i + 1}</span><span class="stp-l">${tr(s)}</span></div>`)}</div>${cur.pickup ? null : cur.stage < 4 ? html`<div class="card col ticket"><span class="tkicon"><${Ic} n="shield"/></span><b>${tr("Delivery code")}</b><p class="sm mu">${tr("Show this QR to your courier, or give them the code.")}</p><div class=${"hand2" + (cur.live && /^[0-9]{4,6}$/.test(String(cur.pin)) ? "" : " one")}>${cur.live && /^[0-9]{4,6}$/.test(String(cur.pin)) && html`<div class="hand-tile"><span class="hand-k"><${Ic} n="cam"/>${tr("To scan")}</span><${QRCode} text=${QR_TEXT(cur.id, cur.pin)}/></div>`}<div class="hand-tile"><span class="hand-k"><${Ic} n="shield"/>${tr("To read out")}</span><div class="hand-pin">${cur.pin.split("").map(d => html`<span>${d}</span>`)}</div></div></div></div><div class="row">${cur.stage >= 1 && html`<button class="btn g" onClick=${() => setCh(true)}><${Ic} n="chat"/>Chat${chatUnread(cur.id) > 0 && html`<em class="chat-bdg">${chatUnread(cur.id)}</em>`}</button>`}${cur.stage >= 1 && html`<button class="btn g" onClick=${() => setRep(cur)}>${tr("Report a problem")}</button>`}${cur.stage < 3 && html`<button class="btn g" style=${{ display: cur.live ? "none" : undefined }} onClick=${() => adv(cur.id)}>Demo: advance</button>`}</div>` : html`<div class="card"><b>Delivered.</b><p class="sm mu">Pay ${cur.total} DA in cash to ${cur.run && cur.run.n}.</p></div>`}</div></div>`;
   else if (tab === "set")
-    body = html`<div class="app"><${Top}/><${Settings} me=${me} sx=${sx} onOut=${sx.out}>${!LIVE && html`<div class="card row"><span>Credit</span><b class="sp pr">${me.credit || 0} DA</b></div>`}<//></div>`;
+    body = html`<div class="app"><${Top}/><${Settings} me=${me} sx=${sx} onOut=${sx.out}>${LIVE && sx.dbRole === "customer" && html`<${BecomeCourier} sx=${sx}/>`}${!LIVE && html`<div class="card row"><span>Credit</span><b class="sp pr">${me.credit || 0} DA</b></div>`}<//></div>`;
   else {
     const hidden = HIDDEN.get(),
       hs = orders.filter(o => o.mine && (o.stage === 4 || o.x) && !hidden.has(String(o.id)));
@@ -5716,7 +5932,9 @@ function Admin({
   )}</div>`;
   const places = html`<div class="card col admin-form"><h3>Add a restaurant</h3><input class="in" placeholder="Restaurant name" value=${name} onInput=${e => setName(e.target.value)}/><input class="in" placeholder="Full address" value=${address} onInput=${e => setAddress(e.target.value)}/><select class="in" value=${kind} onChange=${e => setKind(e.target.value)}><option>Fast food</option><option>Pizza</option><option>Burgers</option><option>Sandwiches</option><option>Other</option></select>${photoInput("Add restaurant photo", photo, setPhoto)}<button class="btn" disabled=${!name.trim() || !address.trim() || !photo} onClick=${addRestaurant}>Save restaurant</button></div><div class="card col admin-form"><h3>Add a menu item</h3><select class="in" aria-label="Choose restaurant" value=${target} onChange=${e => setTarget(e.target.value)}>${restaurants.map(r => html`<option value=${r.id}>${r.n}</option>`)}</select><input class="in" placeholder="Dish name" value=${dish} onInput=${e => setDish(e.target.value)}/><input class="in" type="number" min="1" step="10" placeholder="Price in DA" value=${price} onInput=${e => setPrice(e.target.value)}/>${photoInput("Add dish photo", dishPhoto, setDishPhoto)}<button class="btn" disabled=${!target || !dish.trim() || !Number.isFinite(Number(price)) || Number(price) <= 0 || !dishPhoto} onClick=${addDish}>Add menu item</button></div><h3>Restaurant list</h3>${listed}`;
   const meetingPanel = html`<div class="card col admin-form"><h3>Add a campus meetup place</h3><p class="mu sm">Students can choose this spot when placing an order.</p><input class="in" placeholder="Place name, e.g. Main library entrance" value=${spotName} onInput=${e => setSpotName(e.target.value)}/><input class="in" placeholder="Address or landmark inside campus" value=${spotAddress} onInput=${e => setSpotAddress(e.target.value)}/><select class="in" value=${spotZone} onChange=${e => setSpotZone(e.target.value)}><option>Cefos</option><option>Sidi Ammar</option></select><input class="in" type="number" min="0" step="0.1" placeholder="Distance from campus gate (km)" value=${spotKm} onInput=${e => setSpotKm(e.target.value)}/><button class="btn" disabled=${!spotName.trim() || !spotAddress.trim() || !Number.isFinite(Number(spotKm)) || Number(spotKm) < 0} onClick=${addMeetingPlace}>Save meetup place</button></div><h3>Campus meetup places</h3><div class="col">${meetingPlaces.map(p => html`<div class="card row admin-restaurant"><div class="admin-meta"><b>${p.n}</b><p class="sm mu">${p.z} · ${p.address || p.km + " km from campus gate"}</p></div><span class="tag">${p.km} km</span></div>`)}</div>`;
-  const runners = html`<h2>Runner approvals</h2><p class="mu sm">${tr("{a} waiting, {b} approved")
+  const runners = html`<h2>Runner approvals</h2><p class="sm cr-check">${tr("Approve only if the first and last name in the app match the student card exactly.")}</p><p class="mu sm">${tr(
+    "{a} waiting, {b} approved"
+  )
     .replace("{a}", pend.length)
     .replace("{b}", apps.length - pend.length)}</p>${apps.map(
     a =>
@@ -6844,6 +7062,18 @@ function App() {
     campusAuto: campusHere || homeCampus || "Sidi Amar",
     homeCampus: homeCampus || "Sidi Amar",
     modes: LIVE ? MODES[dbRole] || [] : [],
+    dbRole,
+    // a customer applied to deliver (Settings → Become a courier): pending courier, card photo uploaded by the courier check
+    becameCourier: (name, img) => {
+      setDbRole("courier");
+      setUsers(u => {
+        const b = u.c || u.r || {};
+        return { ...u, c: { ...b, n: name, role: "courier" }, r: { ...b, n: name, role: "courier", img } };
+      });
+      cstRef.current = "pending";
+      setCst("pending");
+      setView("r");
+    },
     uid: (users.c && users.c.uid) || (SBS.s && SBS.s.user && SBS.s.user.id) || null,
     refreshLive: () => liveRef.current && liveRef.current(),
     pen,
