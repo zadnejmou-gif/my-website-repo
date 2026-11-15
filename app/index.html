@@ -1310,6 +1310,10 @@ html[data-theme="dark"] .qr-note{background:#3a1e16;color:#F5B9A6!important}
 :root[data-theme="dark"] .om-car{filter:invert(1) drop-shadow(0 3px 5px rgba(0,0,0,.6))}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .om-car{filter:invert(1) drop-shadow(0 3px 5px rgba(0,0,0,.6))}}
 @media (prefers-reduced-motion:reduce){:root .om-pill-ic.live{animation:none}}
+/* map background while tiles load: grey in light mode, dark in dark mode (no light strip on the dark map) */
+:root .om-map.leaflet-container{background:#EEF0EF}
+:root[data-theme="dark"] .om-map.leaflet-container{background:#1B1E1D}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .om-map.leaflet-container{background:#1B1E1D}}
 
 </style>
 </head>
