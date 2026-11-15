@@ -1265,6 +1265,51 @@ html[data-theme="dark"] .qr-note{background:#3a1e16;color:#F5B9A6!important}
   :root .maptoggle{padding:6px 10px;font-size:11.5px;right:10px}
 }
 :root .mapbadge .live-dot{flex:none}
+/* ===== order map, Uber style (19/11) ===== */
+:root .om-wrap{background:#EEF0EF}
+/* light grey streets (same Esri tiles, colours removed); dark grey in dark mode */
+:root .om-tiles{filter:grayscale(1) brightness(1.07) contrast(.86)}
+:root[data-theme="dark"] .om-wrap{background:#1B1E1D}
+:root[data-theme="dark"] .om-tiles{filter:grayscale(1) invert(1) brightness(.92) contrast(.82)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .om-tiles{filter:grayscale(1) invert(1) brightness(.92) contrast(.82)}}
+/* route: white casing + thick black line (white line in dark mode) */
+:root .om-route-casing{stroke:#fff;stroke-opacity:.95;stroke-linecap:round;stroke-linejoin:round;fill:none}
+:root .om-route{stroke:#111;stroke-linecap:round;stroke-linejoin:round;fill:none}
+:root .om-route.guess{stroke-dasharray:1 10;stroke-width:5}
+:root[data-theme="dark"] .om-route-casing{stroke:#000;stroke-opacity:.6}
+:root[data-theme="dark"] .om-route{stroke:#F2F4F3}
+/* markers */
+:root .om-pin{background:none!important;border:0!important;box-shadow:none!important;border-radius:0}
+:root .om-pin svg{display:block;width:100%;height:100%}
+:root .om-rest{border-radius:50%!important;background:#111!important;border:3px solid #fff!important;box-shadow:0 4px 12px -3px rgba(0,0,0,.45)!important}
+:root .om-rest svg{width:58%;height:58%}
+:root .om-dst svg{filter:drop-shadow(0 4px 6px rgba(0,0,0,.35))}
+:root .om-run{background:none!important}
+:root .om-car{display:block;width:40px;height:40px;transition:transform .6s ease;filter:drop-shadow(0 3px 5px rgba(0,0,0,.45))}
+:root .om-me{border-radius:50%!important;background:#2F7BF6!important;border:3px solid #fff!important;box-shadow:0 0 0 8px rgba(47,123,246,.18)!important}
+/* floating pill at the bottom: "Your courier is 5 min away" */
+:root .om-pill{position:absolute;z-index:450;left:50%;bottom:150px;transform:translateX(-50%);display:flex;align-items:center;gap:10px;max-width:calc(100% - 28px);padding:10px 16px 10px 10px;border-radius:999px;background:#fff;color:#0B1A13;box-shadow:0 10px 28px -8px rgba(0,0,0,.35);white-space:nowrap}
+:root .om-pill b{font-size:14px;font-weight:700;overflow:hidden;text-overflow:ellipsis}
+:root .om-pill-ic{flex:none;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:#111;color:#fff}
+:root .om-pill-ic svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+:root .om-pill.wait .om-pill-ic{background:#EEF0EF}
+:root .om-spin{width:14px;height:14px;border-radius:50%;border:2.5px solid #C9CFCC;border-top-color:#111;animation:om-spin .9s linear infinite}
+@keyframes om-spin{to{transform:rotate(360deg)}}
+:root[data-theme="dark"] .om-pill{background:#202524;color:#F2F4F3}
+:root[data-theme="dark"] .om-pill-ic{background:#F2F4F3;color:#111}
+:root .om-livebadge{position:absolute;z-index:450;left:12px;top:12px;display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;background:#111;color:#fff;font-size:11px;font-weight:700;letter-spacing:.06em}
+:root .om-livebadge i{width:7px;height:7px;border-radius:50%;background:#3DDC97;box-shadow:0 0 0 3px rgba(61,220,151,.3);animation:om-live 1.6s ease-in-out infinite}
+@keyframes om-live{50%{opacity:.35}}
+:root .om-gm{top:12px;left:auto;right:12px}
+:root .om-wrap .leaflet-control-attribution{font-size:9px;background:rgba(255,255,255,.7)}
+@media (prefers-reduced-motion:reduce){:root .om-car,:root .om-spin,:root .om-livebadge i{transition:none;animation:none}}
+/* live = a green pulsing ring on the pill's icon; white car on the dark map */
+:root .om-pill-ic.live{box-shadow:0 0 0 3px #fff,0 0 0 5px #3DDC97;animation:om-ring 1.8s ease-in-out infinite}
+@keyframes om-ring{50%{box-shadow:0 0 0 3px #fff,0 0 0 8px rgba(61,220,151,.35)}}
+:root[data-theme="dark"] .om-pill-ic.live{box-shadow:0 0 0 3px #202524,0 0 0 5px #3DDC97}
+:root[data-theme="dark"] .om-car{filter:invert(1) drop-shadow(0 3px 5px rgba(0,0,0,.6))}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .om-car{filter:invert(1) drop-shadow(0 3px 5px rgba(0,0,0,.6))}}
+@media (prefers-reduced-motion:reduce){:root .om-pill-ic.live{animation:none}}
 
 </style>
 </head>
@@ -4834,11 +4879,67 @@ const myPosStop = () => {
   MYPOS.wid = null;
 };
 const fmtDist = k => (k < 1 ? Math.max(10, Math.round((k * 1000) / 10) * 10) + " m" : k.toFixed(1) + " km");
+// ---- Uber-style order map: light grey streets, black route that follows the roads, car marker, orange pin ----
+// Route: the public OSRM server (one request when the courier has moved ~40 m or the target changes, cached);
+// if it fails, a smooth curve is drawn instead.
+const ROUTES = {};
+const routeKey = pts => pts.map(p => p.lat.toFixed(4) + "," + p.lng.toFixed(4)).join(";");
+const fetchRoute = pts => {
+  const k = routeKey(pts);
+  if (ROUTES[k]) return ROUTES[k];
+  ROUTES[k] = fetch(
+    "https://router.project-osrm.org/route/v1/driving/" +
+      pts.map(p => p.lng + "," + p.lat).join(";") +
+      "?overview=full&geometries=geojson"
+  )
+    .then(r => (r.ok ? r.json() : Promise.reject(r.status)))
+    .then(j => {
+      const r = j && j.routes && j.routes[0];
+      if (!r) throw new Error("no route");
+      return { line: r.geometry.coordinates.map(c => [c[1], c[0]]), km: r.distance / 1000, min: r.duration / 60 };
+    })
+    .catch(() => {
+      delete ROUTES[k];
+      return null;
+    });
+  return ROUTES[k];
+};
+// fallback: a gentle curve through the points (never a harsh straight line)
+const curveLine = pts => {
+  const out = [];
+  for (let i = 0; i < pts.length - 1; i++) {
+    const a = pts[i],
+      b = pts[i + 1],
+      mx = (a.lat + b.lat) / 2 + (b.lng - a.lng) * 0.18,
+      my = (a.lng + b.lng) / 2 - (b.lat - a.lat) * 0.18;
+    for (let t = 0; t <= 1.0001; t += 0.05)
+      out.push([
+        (1 - t) * (1 - t) * a.lat + 2 * (1 - t) * t * mx + t * t * b.lat,
+        (1 - t) * (1 - t) * a.lng + 2 * (1 - t) * t * my + t * t * b.lng
+      ]);
+  }
+  return out;
+};
+const bearing = (a, b) => {
+  const r = Math.PI / 180,
+    y = Math.sin((b.lng - a.lng) * r) * Math.cos(b.lat * r),
+    x =
+      Math.cos(a.lat * r) * Math.sin(b.lat * r) -
+      Math.sin(a.lat * r) * Math.cos(b.lat * r) * Math.cos((b.lng - a.lng) * r);
+  return (Math.atan2(y, x) / r + 360) % 360;
+};
+const CAR_SVG =
+  '<svg viewBox="0 0 40 40" aria-hidden="true"><rect x="12" y="5" width="16" height="30" rx="6" fill="#111"/><rect x="14" y="10" width="12" height="6" rx="2" fill="#5B6B66"/><rect x="14" y="25" width="12" height="5" rx="2" fill="#5B6B66"/><rect x="12" y="17" width="16" height="7" rx="1" fill="#222"/><circle cx="14.5" cy="7" r="1.3" fill="#FFE27A"/><circle cx="25.5" cy="7" r="1.3" fill="#FFE27A"/></svg>';
+const PIN_SVG =
+  '<svg viewBox="0 0 32 44" aria-hidden="true"><path d="M16 43S2 27 2 16a14 14 0 0 1 28 0c0 11-14 27-14 27z" fill="#F26B1D"/><circle cx="16" cy="16" r="6" fill="#fff"/></svg>';
+const STORE_SVG =
+  '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 9 5 4h14l1.5 5M4.5 9v11h15V9M3.5 9h17M10 20v-5h4v5"/></svg>';
 function OrderMap({ o, side }) {
   const L0 = useLoc(),
     ref = useRef(),
     M = useRef({}),
-    [cp, setCp] = useState(null);
+    [cp, setCp] = useState(null),
+    [rt, setRt] = useState(null);
   useEffect(() => {
     if (side !== "r" || !o.cust) return;
     let dead = false;
@@ -4850,7 +4951,7 @@ function OrderMap({ o, side }) {
       } catch (e) {}
     };
     f();
-    const i = setInterval(f, 8000);
+    const i = setInterval(onScreen(f), 8000);
     return () => {
       dead = true;
       clearInterval(i);
@@ -4859,7 +4960,25 @@ function OrderMap({ o, side }) {
   const courier = L0.pos && L0.pos.on && Date.now() - L0.pos.t < 120000 ? L0.pos : null,
     cust = side === "c" ? MYPOS.pos : cp,
     R = o.rlat != null ? { lat: o.rlat, lng: o.rlng } : null,
-    P = o.mlat != null ? { lat: o.mlat, lng: o.mlng } : null;
+    P = o.mlat != null ? { lat: o.mlat, lng: o.mlng } : null,
+    dest = side === "r" && o.stage >= 3 ? cust || P : P,
+    // route shown: courier → restaurant (before pickup) → destination; no courier yet: restaurant → destination
+    path = (courier ? [courier, o.stage < 3 ? R : null, dest] : [R, dest]).filter(Boolean),
+    // ~40 m grid, so the route is not asked again at every GPS tick
+    pathKey = path.map(p => Math.round(p.lat * 2500) + "," + Math.round(p.lng * 2500)).join(";");
+  useEffect(() => {
+    let dead = false;
+    if (path.length < 2) {
+      setRt(null);
+      return;
+    }
+    fetchRoute(path).then(r => {
+      if (!dead) setRt(r ? { ...r, key: pathKey } : { line: curveLine(path), key: pathKey, guess: 1 });
+    });
+    return () => {
+      dead = true;
+    };
+  }, [pathKey]);
   useEffect(() => {
     let dead = false;
     loadLeaflet()
@@ -4867,14 +4986,14 @@ function OrderMap({ o, side }) {
         if (dead || !ref.current) return;
         const m = M.current;
         if (!m.map) {
-          m.map = L.map(ref.current, { zoomControl: false });
+          m.map = L.map(ref.current, { zoomControl: false, attributionControl: true });
           L.tileLayer(
             "https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}",
-            { maxZoom: 19, attribution: "Tiles © Esri" }
+            { maxZoom: 19, attribution: "Tiles © Esri", className: "om-tiles" }
           ).addTo(m.map);
           m.mk = {};
         }
-        const put = (k, pos, cls, h) => {
+        const put = (k, pos, cls, h, size, anchor) => {
           if (!pos) {
             if (m.mk[k]) {
               m.map.removeLayer(m.mk[k]);
@@ -4888,20 +5007,48 @@ function OrderMap({ o, side }) {
               icon: L.divIcon({
                 className: "om-pin " + cls,
                 html: h || "<i></i>",
-                iconSize: [36, 36],
-                iconAnchor: [18, 18]
-              })
+                iconSize: size || [36, 36],
+                iconAnchor: anchor || [18, 18]
+              }),
+              zIndexOffset: k === "c" ? 1000 : k === "p" ? 500 : 0
             }).addTo(m.map);
         };
-        put("r", R, "om-rest", "R");
-        put("p", P, "om-dst");
-        put("c", courier, "om-run");
-        put("u", cust, "om-me");
-        const pts = [R, P, courier, cust].filter(Boolean).map(x => [x.lat, x.lng]);
-        if (pts.length && (!m.fit || m.fit < pts.length)) {
+        put("r", R, "om-rest", STORE_SVG, [34, 34], [17, 17]);
+        put("p", dest, "om-dst", PIN_SVG, [32, 44], [16, 43]);
+        put("u", side === "c" || o.stage < 3 ? cust : null, "om-me");
+        put("c", courier, "om-run", '<span class="om-car">' + CAR_SVG + "</span>", [40, 40], [20, 20]);
+        // the car turns in the direction it is moving
+        if (courier && m.mk.c) {
+          if (m.prev && kmTo(m.prev, courier) > 0.008) m.head = bearing(m.prev, courier);
+          m.prev = courier;
+          const el = m.mk.c.getElement(),
+            car = el && el.querySelector(".om-car");
+          if (car) car.style.transform = "rotate(" + (m.head || 0) + "deg)";
+        }
+        // route: a white casing under a thick black line
+        if (m.route) m.route.forEach(l => m.map.removeLayer(l));
+        m.route = null;
+        if (rt && rt.line && rt.line.length > 1) {
+          m.route = [
+            L.polyline(rt.line, { className: "om-route-casing", weight: 10, interactive: false }),
+            L.polyline(rt.line, { className: "om-route" + (rt.guess ? " guess" : ""), weight: 5, interactive: false })
+          ];
+          m.route.forEach(l => l.addTo(m.map));
+        }
+        const pts = [R, dest, courier, cust].filter(Boolean).map(x => [x.lat, x.lng]);
+        // frame the whole route (once per step of the order), else the markers
+        if (rt && rt.line && rt.line.length > 1 && m.fitStage !== o.stage + ":" + rt.key.split(";").length) {
+          m.map.fitBounds(L.latLngBounds(rt.line.concat(pts)), {
+            paddingTopLeft: [30, 70],
+            paddingBottomRight: [30, 190],
+            maxZoom: 17
+          });
+          m.fitStage = o.stage + ":" + rt.key.split(";").length;
+          m.fit = pts.length;
+        } else if (pts.length && (!m.fit || m.fit < pts.length)) {
           m.map.fitBounds(L.latLngBounds(pts), {
-            paddingTopLeft: [30, 130],
-            paddingBottomRight: [30, 230],
+            paddingTopLeft: [36, 100],
+            paddingBottomRight: [36, 200],
             maxZoom: 17
           });
           m.fit = pts.length;
@@ -4911,7 +5058,7 @@ function OrderMap({ o, side }) {
     return () => {
       dead = true;
     };
-  }, [o.id, courier && courier.lat, courier && courier.lng, cust && cust.lat, cust && cust.lng]);
+  }, [o.id, courier && courier.lat, courier && courier.lng, cust && cust.lat, cust && cust.lng, rt && rt.key, o.stage]);
   useEffect(
     () => () => {
       M.current.map && M.current.map.remove();
@@ -4923,9 +5070,38 @@ function OrderMap({ o, side }) {
     gm = goTo
       ? "https://www.google.com/maps/dir/?api=1&destination=" + goTo.lat + "," + goTo.lng + "&travelmode=walking"
       : null,
-    tgt = side === "c" ? cust || P : goTo,
-    dist = courier && tgt ? kmTo(courier, tgt) : null;
-  return html`<div class="om-wrap"><div class="om-map" ref=${ref}></div><div class="lv-top">${courier ? html`<span class="lv-live"><i></i>${tr("LIVE")}</span>` : html`<span class="om-tag">${tr(side === "c" ? "Waiting for the courier's position" : "Waiting for your position")}</span>`}${dist != null && html`<span class="lv-eta">${dist < 0.05 ? tr("Arrived") : fmtDist(dist) + " · ~" + Math.max(1, Math.round((dist / 5) * 60)) + " min"}</span>`}</div><div class="om-legend"><span><i class="lg om-rest"></i>${tr("Restaurant")}</span><span><i class="lg om-dst"></i>${tr("Meeting point")}</span><span><i class="lg om-run"></i>${tr("Courier")}</span><span><i class="lg om-me"></i>${tr(side === "c" ? "Your position" : "Customer")}</span></div>${gm && html`<a class="om-gm" href=${gm} target="_blank" rel="noopener"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l18-8-8 18-2-8z"/></svg>${tr(side === "r" ? (o.stage < 3 ? "Directions to the restaurant" : "Directions to the customer") : "Directions to the meeting point")}</a>`}</div>`;
+    exact = rt && !rt.guess && rt.key === pathKey,
+    // remaining distance/time: along the road when we have the route
+    km = courier ? (exact ? rt.km : dest ? kmTo(courier, o.stage < 3 && R ? R : dest) : null) : null,
+    mins = km != null ? Math.max(1, Math.round(exact ? rt.min * 1.2 : (km / 5) * 60)) : null,
+    near = km != null && km < 0.05,
+    fr = uiLanguage === "fr",
+    pill =
+      side === "c"
+        ? courier
+          ? near
+            ? fr
+              ? "Ton livreur est arrivé"
+              : "Your courier has arrived"
+            : fr
+              ? "Ton livreur arrive dans " + mins + " min"
+              : "Your courier is " + mins + " min away"
+          : tr("Waiting for the courier's position")
+        : courier
+          ? near
+            ? tr("Arrived")
+            : mins +
+              " min · " +
+              fmtDist(km) +
+              (fr
+                ? o.stage < 3
+                  ? " jusqu’au restaurant"
+                  : " jusqu’au client"
+                : o.stage < 3
+                  ? " to the restaurant"
+                  : " to the customer")
+          : tr("Waiting for your position");
+  return html`<div class="om-wrap"><div class="om-map" ref=${ref}></div><div class=${"om-pill" + (courier ? "" : " wait")}><span class=${"om-pill-ic" + (courier ? " live" : "")} title=${courier ? tr("LIVE") : ""}>${courier ? html`<svg viewBox="0 0 24 24" aria-hidden="true"><path d=${SIP.car}/></svg>` : html`<i class="om-spin"></i>`}</span><b>${pill}</b></div>${gm && html`<a class="om-gm" href=${gm} target="_blank" rel="noopener"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l18-8-8 18-2-8z"/></svg>${tr(side === "r" ? (o.stage < 3 ? "Directions to the restaurant" : "Directions to the customer") : "Directions to the meeting point")}</a>`}</div>`;
 }
 const LEGAL_CONTACT = "contact.dropby@gmail.com",
   LEGAL_DATE = "12/11/2026";
