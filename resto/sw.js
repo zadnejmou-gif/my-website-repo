@@ -6,14 +6,22 @@ self.addEventListener("activate", e => e.waitUntil(self.clients.claim()));
 self.addEventListener("push", e => {
   let d = {};
   try { d = e.data ? e.data.json() : {}; } catch { d = { title: "DropBy", body: e.data ? e.data.text() : "" }; }
+  // an order waiting for the restaurant (sent with the /resto/ link, also reminded every minute by SQL v31):
+  // long vibration, and the notification stays on screen until it is tapped
+  const forVendor = /\/resto\//.test(d.url || "");
+  // tapping opens this worker's own place: the app for a manager who turned notifications on in the app,
+  // DropBy Resto for one who turned them on in Resto
+  const scope = self.registration.scope,
+    target = d.url && new URL(d.url, self.location.origin).href.startsWith(scope) ? d.url : scope;
   e.waitUntil(self.registration.showNotification(d.title || "DropBy", {
     body: d.body || "",
     tag: d.tag || undefined,
     renotify: !!d.tag,
+    requireInteraction: forVendor,
     icon: "/icon-192.png",
     badge: "/favicon-96x96.png",
-    vibrate: [180, 80, 180],
-    data: { url: d.url || self.registration.scope }
+    vibrate: forVendor ? [500, 200, 500, 200, 500, 200, 900] : [180, 80, 180],
+    data: { url: target }
   }));
 });
 
