@@ -8206,8 +8206,9 @@ function App() {
         const r = await sbApi("/rest/v1/courier_profiles?select=status,id_photo_path&user_id=eq." + uid);
         if (dead || !Array.isArray(r)) return; // no clear answer (network, session refresh): keep the current status
         const c = r[0];
-        {
-          const nst = c ? c.status : "pending";
+        // no row = no clear answer yet (session still refreshing at launch): keep the current status
+        if (c) {
+          const nst = c.status;
           // "you're approved" is shown ONCE per account and per phone, never again after that
           const seenKey = "dropby-approved-" + uid;
           let seen = false;
@@ -8217,13 +8218,6 @@ function App() {
           if (nst === "approved") {
             if (cstRef.current === "pending" && !seen) {
               setApToast(true);
-              try {
-                if ("Notification" in window && Notification.permission === "granted")
-                  new Notification("DropBy", {
-                    body: tr("Your courier account is approved! You can start delivering."),
-                    tag: "dropby-approved"
-                  });
-              } catch (e) {}
             }
             try {
               localStorage.setItem(seenKey, "1");
@@ -8403,11 +8397,8 @@ function App() {
             CHAT.seen[o.id] = last.id;
             if (CHAT.open !== o.id) {
               const who = o.mine ? (o.run && o.run.n) || tr("Your runner") : o.c || tr("Customer");
+              // in-app banner only: the server's push (tag chat<order>) covers the app when it is closed
               setMsgToast({ oid: o.id, who, text: last.body, side: o.mine ? "c" : "r" });
-              try {
-                if ("Notification" in window && Notification.permission === "granted")
-                  new Notification("DropBy · " + who, { body: last.body, tag: "dropby-" + o.id });
-              } catch (e) {}
             }
           }
           if (CHAT.open !== o.id || list.length > (CHAT.msgs[o.id] || []).length) CHAT.msgs[o.id] = list;
@@ -8462,11 +8453,8 @@ function App() {
       const was = prevX.current[o.id];
       if (was === 0 && o.x) {
         const m = tr(o.why || "Your order was cancelled.");
+        // in-app banner only: the server already sends the 'order cancelled' notification
         setMsgToast({ oid: o.id, who: tr("Order cancelled"), text: m, side: "c" });
-        try {
-          if ("Notification" in window && Notification.permission === "granted")
-            new Notification("DropBy", { body: m, tag: "dropby-x-" + o.id });
-        } catch (e) {}
       }
       prevX.current[o.id] = o.x ? 1 : 0;
     });

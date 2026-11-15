@@ -13,7 +13,13 @@ self.addEventListener("push", e => {
   // DropBy Resto for one who turned them on in Resto
   const scope = self.registration.scope,
     target = d.url && new URL(d.url, self.location.origin).href.startsWith(scope) ? d.url : scope;
-  e.waitUntil(self.registration.showNotification(d.title || "DropBy", {
+  e.waitUntil((async () => {
+  // a chat message while the app is open on screen: the app already shows it in a banner, no second notification
+  if (/^chat/.test(d.tag || "")) {
+    const wins = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
+    if (wins.some(w => w.visibilityState === "visible" && w.url.startsWith(self.registration.scope))) return;
+  }
+  return self.registration.showNotification(d.title || "DropBy", {
     body: d.body || "",
     tag: d.tag || undefined,
     renotify: !!d.tag,
@@ -22,7 +28,8 @@ self.addEventListener("push", e => {
     badge: "/favicon-96x96.png",
     vibrate: forVendor ? [500, 200, 500, 200, 500, 200, 900] : [180, 80, 180],
     data: { url: target }
-  }));
+  });
+  })());
 });
 
 self.addEventListener("notificationclick", e => {
