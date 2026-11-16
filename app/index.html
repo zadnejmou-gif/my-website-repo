@@ -459,7 +459,7 @@ html body::before{content:"";position:fixed;inset:0;pointer-events:none;backgrou
 :root .pop-card{position:relative;flex:0 0 72%;height:200px;border-radius:26px;overflow:hidden;scroll-snap-align:start;text-align:left;isolation:isolate;box-shadow:0 18px 34px -20px rgba(0,38,26,.8);transition:transform .55s var(--e-spring)}
 :root .pop-card:active{transform:scale(.97)}
 :root .pop-img,:root .pop-card .pic-fb{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform 1.2s var(--e-ease)}
-:root .pop-card:hover .pop-img{transform:scale(1.06)}
+@media (hover:hover) and (pointer:fine){:root .pop-card:hover .pop-img{transform:scale(1.06)}}
 :root .pop-shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 35%,rgba(0,22,14,.88))}
 :root .pop-txt{position:absolute;left:16px;right:16px;bottom:14px;display:grid;gap:2px;color:#fff}
 :root .pop-txt b{font-size:18px;font-weight:700;letter-spacing:-.03em}
@@ -470,7 +470,7 @@ html body::before{content:"";position:fixed;inset:0;pointer-events:none;backgrou
 :root .rcard:active{transform:scale(.975)}
 :root .rcard-media{position:relative;display:block;height:148px;overflow:hidden;background:#0B4A33}
 :root .rcard-img,:root .rcard-media .pic-fb{width:100%;height:100%;object-fit:cover;transition:transform 1.2s var(--e-ease)}
-:root .rcard:hover .rcard-img{transform:scale(1.05)}
+@media (hover:hover) and (pointer:fine){:root .rcard:hover .rcard-img{transform:scale(1.05)}}
 :root .rcard-open{position:absolute;left:12px;top:12px;display:inline-flex;align-items:center;gap:6px;padding:6px 11px;border-radius:999px;background:rgba(255,255,255,.94);color:#006B45;font-size:11.5px;font-weight:700}
 :root .rcard-open::before{content:"";width:7px;height:7px;border-radius:50%;background:#00A86B;box-shadow:0 0 0 3px rgba(0,168,107,.2)}
 :root .rcard-open.off{color:#8A3B2F}
@@ -497,7 +497,7 @@ html body::before{content:"";position:fixed;inset:0;pointer-events:none;backgrou
 :root .dcard:active{transform:scale(.96)}
 :root .dcard-media{display:block;height:118px;border-radius:16px;overflow:hidden;background:#0B4A33}
 :root .dcard-img,:root .dcard-media .pic-fb{width:100%;height:100%;object-fit:cover;transition:transform 1s var(--e-ease)}
-:root .dcard:hover .dcard-img{transform:scale(1.07)}
+@media (hover:hover) and (pointer:fine){:root .dcard:hover .dcard-img{transform:scale(1.07)}}
 :root .dcard>b{padding:4px 6px 0;font-size:14.5px;font-weight:600;letter-spacing:-.02em;line-height:1.2;color:var(--tx)}
 :root .dcard-row{display:flex;align-items:center;justify-content:space-between;padding:0 4px 0 6px}
 :root .dcard-add{display:grid;place-items:center;width:32px;height:32px;border-radius:50%;background:var(--e-em);color:#fff;box-shadow:0 8px 16px -8px rgba(0,107,69,.9);transition:transform .5s var(--e-spring)}
@@ -1315,6 +1315,7 @@ html[data-theme="dark"] .qr-note{background:#3a1e16;color:#F5B9A6!important}
 :root[data-theme="dark"] .om-map.leaflet-container{background:#1B1E1D}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .om-map.leaflet-container{background:#1B1E1D}}
 
+/* card overlays always above the photo/logo: on iOS a tap left a sticky :hover scale on the image, and Safari then painted the transformed image over the name, shade and badges (2026-11-16) */:root .pop-img,:root .pop-card .pic-fb,:root .rcard-img,:root .dcard-img{z-index:0}:root .pop-shade{z-index:1}:root .pop-txt{z-index:2}:root .rcard-open,:root .rate-tag.on-media{z-index:2}
 </style>
 </head>
 <body>
