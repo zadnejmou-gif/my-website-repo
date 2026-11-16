@@ -1314,8 +1314,53 @@ html[data-theme="dark"] .qr-note{background:#3a1e16;color:#F5B9A6!important}
 :root .om-map.leaflet-container{background:#EEF0EF}
 :root[data-theme="dark"] .om-map.leaflet-container{background:#1B1E1D}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .om-map.leaflet-container{background:#1B1E1D}}
+/* ===== green map + courier itinerary in 2 steps (16/11) ===== */
+:root .om-wrap,:root .om-map.leaflet-container{background:#E2EFE5}
+:root .om-tiles{filter:grayscale(1) sepia(.7) hue-rotate(62deg) saturate(1.2) brightness(1) contrast(.9)}
+:root[data-theme="dark"] .om-wrap,:root[data-theme="dark"] .om-map.leaflet-container{background:#0E1F17}
+:root[data-theme="dark"] .om-tiles{filter:grayscale(1) invert(1) sepia(.5) hue-rotate(95deg) saturate(1.6) brightness(.72) contrast(.9)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .om-wrap,:root:not([data-theme="light"]) .om-map.leaflet-container{background:#0E1F17}:root:not([data-theme="light"]) .om-tiles{filter:grayscale(1) invert(1) sepia(.5) hue-rotate(95deg) saturate(1.6) brightness(.72) contrast(.9)}}
+:root .om-route{stroke:#0B5D3A}
+:root .om-route.next{stroke:#2FA36B;stroke-dasharray:2 11}
+:root .om-route-casing.next{stroke-opacity:.8}
+:root[data-theme="dark"] .om-route{stroke:#3DDC97}
+:root[data-theme="dark"] .om-route.next{stroke:#A8E6C6}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .om-route{stroke:#3DDC97}:root:not([data-theme="light"]) .om-route.next{stroke:#A8E6C6}}
+:root .rs{display:flex;flex-direction:column;gap:4px;padding:14px}
+:root .rs-top{display:flex;align-items:center;justify-content:space-between;padding:0 2px 6px}
+:root .rs-top b{font-size:16px}
+:root .rs-step{border-radius:14px;transition:background-color .2s ease}
+:root .rs-step.now{background:color-mix(in srgb,#2FA36B 10%,transparent)}
+:root .rs-head{display:flex;align-items:center;gap:12px;width:100%;padding:10px;border:0;background:none;color:inherit;font:inherit;text-align:left;cursor:pointer}
+:root .rs-n{flex:none;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:#E2EFE5;color:#0B5D3A;font-weight:700;font-size:14px}
+:root .rs-step.now .rs-n{background:#1F7A4D;color:#fff}
+:root .rs-step.done .rs-n{background:#3DDC97;color:#06301E}
+:root .rs-t{flex:1;min-width:0;display:flex;flex-direction:column}
+:root .rs-t b{font-size:14.5px}
+:root .rs-t i{font-style:normal;font-size:12.5px;opacity:.65;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+:root .rs-m{flex:none;font-size:12.5px;font-weight:700;color:#1F7A4D}
+:root .rs-step.done .rs-t{opacity:.55}
+:root .rs-body{padding:0 10px 12px 52px;display:flex;flex-direction:column;gap:10px}
+:root .rs-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+:root .rs-list li{display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid color-mix(in srgb,currentColor 9%,transparent)}
+:root .rs-list li:first-child{border-top:0}
+:root .rs-ic{flex:none;width:26px;height:26px;border-radius:8px;display:grid;place-items:center;background:#E2EFE5;color:#0B5D3A}
+:root .rs-ic svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+:root .rs-tx{flex:1;font-size:13.5px;line-height:1.3}
+:root .rs-d{flex:none;font-size:12px;opacity:.6;font-variant-numeric:tabular-nums}
+:root .rs-gm{align-self:flex-start;display:inline-flex;align-items:center;gap:7px;padding:9px 14px;border-radius:999px;background:#1F7A4D;color:#fff;font-size:13px;font-weight:700;text-decoration:none}
+:root .rs-gm svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2;stroke-linejoin:round}
+:root[data-theme="dark"] .rs-n,:root[data-theme="dark"] .rs-ic{background:#173326;color:#A8E6C6}
+:root[data-theme="dark"] .rs-m{color:#3DDC97}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .rs-n,:root:not([data-theme="light"]) .rs-ic{background:#173326;color:#A8E6C6}:root:not([data-theme="light"]) .rs-m{color:#3DDC97}}
+@media (prefers-reduced-motion:reduce){:root .rs-step{transition:none}}
+/* card overlays always above the photo/logo: on iOS a tap left a sticky :hover scale on the image,
+   and Safari then painted the transformed image over the name, shade and badges (seen on Askim +, 2026-11-16) */
+:root .pop-img,:root .pop-card .pic-fb,:root .rcard-img,:root .dcard-img{z-index:0}
+:root .pop-shade{z-index:1}
+:root .pop-txt{z-index:2}
+:root .rcard-open,:root .rate-tag.on-media{z-index:2}
 
-/* card overlays always above the photo/logo: on iOS a tap left a sticky :hover scale on the image, and Safari then painted the transformed image over the name, shade and badges (2026-11-16) */:root .pop-img,:root .pop-card .pic-fb,:root .rcard-img,:root .dcard-img{z-index:0}:root .pop-shade{z-index:1}:root .pop-txt{z-index:2}:root .rcard-open,:root .rate-tag.on-media{z-index:2}
 </style>
 </head>
 <body>
@@ -4897,13 +4942,26 @@ const fetchRoute = pts => {
   ROUTES[k] = fetch(
     "https://router.project-osrm.org/route/v1/driving/" +
       pts.map(p => p.lng + "," + p.lat).join(";") +
-      "?overview=full&geometries=geojson"
+      "?overview=full&geometries=geojson&steps=true"
   )
     .then(r => (r.ok ? r.json() : Promise.reject(r.status)))
     .then(j => {
       const r = j && j.routes && j.routes[0];
       if (!r) throw new Error("no route");
-      return { line: r.geometry.coordinates.map(c => [c[1], c[0]]), km: r.distance / 1000, min: r.duration / 60 };
+      // legs: one per stop (courier → restaurant, restaurant → meeting point), each with its own line and turn-by-turn steps
+      const legs = (r.legs || []).map(l => ({
+        km: l.distance / 1000,
+        min: l.duration / 60,
+        line: [].concat(...(l.steps || []).map(st => (st.geometry ? st.geometry.coordinates.map(c => [c[1], c[0]]) : []))),
+        steps: (l.steps || []).map(st => ({
+          t: st.maneuver.type,
+          m: st.maneuver.modifier || "",
+          x: st.maneuver.exit || 0,
+          n: st.name || st.ref || "",
+          d: st.distance
+        }))
+      }));
+      return { line: r.geometry.coordinates.map(c => [c[1], c[0]]), km: r.distance / 1000, min: r.duration / 60, legs };
     })
     .catch(() => {
       delete ROUTES[k];
@@ -4937,8 +4995,9 @@ const bearing = (a, b) => {
 };
 const CAR_SVG =
   '<svg viewBox="0 0 40 40" aria-hidden="true"><rect x="12" y="5" width="16" height="30" rx="6" fill="#111"/><rect x="14" y="10" width="12" height="6" rx="2" fill="#5B6B66"/><rect x="14" y="25" width="12" height="5" rx="2" fill="#5B6B66"/><rect x="12" y="17" width="16" height="7" rx="1" fill="#222"/><circle cx="14.5" cy="7" r="1.3" fill="#FFE27A"/><circle cx="25.5" cy="7" r="1.3" fill="#FFE27A"/></svg>';
+// meeting point pin: chrome green (metal gradient + a light reflection), DropBy colours
 const PIN_SVG =
-  '<svg viewBox="0 0 32 44" aria-hidden="true"><path d="M16 43S2 27 2 16a14 14 0 0 1 28 0c0 11-14 27-14 27z" fill="#F26B1D"/><circle cx="16" cy="16" r="6" fill="#fff"/></svg>';
+  '<svg viewBox="0 0 32 44" aria-hidden="true"><defs><linearGradient id="dbPinG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7CF0BE"/><stop offset=".28" stop-color="#1FAF6E"/><stop offset=".55" stop-color="#0A6B43"/><stop offset=".78" stop-color="#2FC583"/><stop offset="1" stop-color="#064A2E"/></linearGradient></defs><path d="M16 43S2 27 2 16a14 14 0 0 1 28 0c0 11-14 27-14 27z" fill="url(#dbPinG)" stroke="#04301E" stroke-opacity=".35"/><path d="M7 11.5a10 10 0 0 1 9-7" fill="none" stroke="#fff" stroke-opacity=".7" stroke-width="2.2" stroke-linecap="round"/><circle cx="16" cy="16" r="6" fill="#fff"/><circle cx="16" cy="16" r="2.6" fill="#0A6B43"/></svg>';
 const STORE_SVG =
   '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 9 5 4h14l1.5 5M4.5 9v11h15V9M3.5 9h17M10 20v-5h4v5"/></svg>';
 function OrderMap({ o, side }) {
@@ -5036,10 +5095,20 @@ function OrderMap({ o, side }) {
         if (m.route) m.route.forEach(l => m.map.removeLayer(l));
         m.route = null;
         if (rt && rt.line && rt.line.length > 1) {
-          m.route = [
-            L.polyline(rt.line, { className: "om-route-casing", weight: 10, interactive: false }),
-            L.polyline(rt.line, { className: "om-route" + (rt.guess ? " guess" : ""), weight: 5, interactive: false })
-          ];
+          // two steps (courier → restaurant → meeting point): the current step solid, the next one dashed
+          const parts =
+            rt.legs && rt.legs.length > 1 && rt.legs.every(l => l.line.length > 1)
+              ? rt.legs.map((l, i) => [l.line, i ? " next" : ""])
+              : [[rt.line, rt.guess ? " guess" : ""]];
+          m.route = [].concat(
+            ...parts
+              .slice()
+              .reverse()
+              .map(([line, c]) => [
+                L.polyline(line, { className: "om-route-casing" + c, weight: 10, interactive: false }),
+                L.polyline(line, { className: "om-route" + c, weight: 5, interactive: false })
+              ])
+          );
           m.route.forEach(l => l.addTo(m.map));
         }
         const pts = [R, dest, courier, cust].filter(Boolean).map(x => [x.lat, x.lng]);
@@ -5075,12 +5144,14 @@ function OrderMap({ o, side }) {
   );
   const goTo = side === "r" ? (o.stage < 3 ? R : cust || P) : P,
     gm = goTo
-      ? "https://www.google.com/maps/dir/?api=1&destination=" + goTo.lat + "," + goTo.lng + "&travelmode=walking"
+      ? "https://www.google.com/maps/dir/?api=1&destination=" + goTo.lat + "," + goTo.lng + "&travelmode=" + (side === "r" ? "driving" : "walking")
       : null,
     exact = rt && !rt.guess && rt.key === pathKey,
     // remaining distance/time: along the road when we have the route
-    km = courier ? (exact ? rt.km : dest ? kmTo(courier, o.stage < 3 && R ? R : dest) : null) : null,
-    mins = km != null ? Math.max(1, Math.round(exact ? rt.min * 1.2 : (km / 5) * 60)) : null,
+    // the courier sees the current step only (to the restaurant before pickup); the customer sees the whole trip
+    leg0 = exact && side === "r" && o.stage < 3 && rt.legs && rt.legs.length > 1 ? rt.legs[0] : null,
+    km = courier ? (exact ? (leg0 || rt).km : dest ? kmTo(courier, o.stage < 3 && R ? R : dest) : null) : null,
+    mins = km != null ? Math.max(1, Math.round(exact ? (leg0 || rt).min * 1.2 : (km / 5) * 60)) : null,
     near = km != null && km < 0.05,
     fr = uiLanguage === "fr",
     pill =
@@ -5109,6 +5180,102 @@ function OrderMap({ o, side }) {
                   : " to the customer")
           : tr("Waiting for your position");
   return html`<div class="om-wrap"><div class="om-map" ref=${ref}></div><div class=${"om-pill" + (courier ? "" : " wait")}><span class=${"om-pill-ic" + (courier ? " live" : "")} title=${courier ? tr("LIVE") : ""}>${courier ? html`<svg viewBox="0 0 24 24" aria-hidden="true"><path d=${SIP.car}/></svg>` : html`<i class="om-spin"></i>`}</span><b>${pill}</b></div>${gm && html`<a class="om-gm" href=${gm} target="_blank" rel="noopener"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l18-8-8 18-2-8z"/></svg>${tr(side === "r" ? (o.stage < 3 ? "Directions to the restaurant" : "Directions to the customer") : "Directions to the meeting point")}</a>`}</div>`;
+}
+// ---- courier itinerary, step by step: 1) to the restaurant, 2) to the meeting point (OSRM turn-by-turn, by car) ----
+const ROT = { straight: 0, "slight right": 45, right: 90, "sharp right": 135, uturn: 180, "sharp left": -135, left: -90, "slight left": -45 };
+const turnRows = (leg, fr, toRest) => {
+  const out = [],
+    on = n => (n ? (fr ? " sur " : " onto ") + n : ""),
+    dir = m =>
+      fr
+        ? { left: "à gauche", right: "à droite", "slight left": "légèrement à gauche", "slight right": "légèrement à droite", "sharp left": "franchement à gauche", "sharp right": "franchement à droite" }[m]
+        : { left: "left", right: "right", "slight left": "slightly left", "slight right": "slightly right", "sharp left": "sharp left", "sharp right": "sharp right" }[m];
+  leg.steps.forEach((st, i) => {
+    const last = i === leg.steps.length - 1;
+    if (st.t === "notification") return;
+    // "keep going on the same road": add the distance to the row before instead of a new row
+    if (out.length && !last && (st.t === "new name" || ((st.t === "continue" || st.t === "merge") && (!st.m || st.m === "straight")))) {
+      out[out.length - 1].d += st.d;
+      return;
+    }
+    let txt, ic;
+    if (st.t === "arrive") {
+      txt = fr ? (toRest ? "Tu arrives au restaurant" : "Tu arrives au lieu de rencontre") : toRest ? "You reach the restaurant" : "You reach the meeting point";
+      ic = "end";
+    } else if (st.t === "depart") {
+      txt = (fr ? "Pars" : "Start") + on(st.n);
+      ic = 0;
+    } else if (st.t === "roundabout" || st.t === "rotary" || st.t === "roundabout turn") {
+      const x = st.x || 1;
+      txt = fr
+        ? "Au rond-point, prends la " + (x === 1 ? "1re" : x + "e") + " sortie" + on(st.n)
+        : "At the roundabout, take exit " + x + on(st.n);
+      ic = "rb";
+    } else if (st.m === "uturn") {
+      txt = fr ? "Fais demi-tour" + on(st.n) : "Make a U-turn" + on(st.n);
+      ic = 180;
+    } else if (!st.m || st.m === "straight") {
+      txt = (fr ? "Continue tout droit" : "Go straight") + on(st.n);
+      ic = 0;
+    } else if (st.t === "fork" || st.t === "off ramp" || st.t === "on ramp") {
+      const l = st.m.includes("left");
+      txt = (fr ? (l ? "Garde la gauche" : "Garde la droite") : l ? "Keep left" : "Keep right") + on(st.n);
+      ic = ROT[st.m] || 0;
+    } else {
+      txt = (fr ? "Tourne " : "Turn ") + dir(st.m) + on(st.n);
+      ic = ROT[st.m] || 0;
+    }
+    out.push({ txt, ic, d: last ? 0 : st.d });
+  });
+  return out;
+};
+const TurnIc = ({ ic }) =>
+  ic === "end"
+    ? html`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-6-6.2-6-11a6 6 0 0 1 12 0c0 4.8-6 11-6 11z"/><circle cx="12" cy="10" r="2.2"/></svg>`
+    : ic === "rb"
+      ? html`<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="4.5"/><path d="M12 8.5V3M9.5 5.5 12 3l2.5 2.5"/></svg>`
+      : html`<svg viewBox="0 0 24 24" aria-hidden="true" style=${{ transform: "rotate(" + ic + "deg)" }}><path d="M12 20V5M6.5 10.5 12 5l5.5 5.5"/></svg>`;
+function RouteSteps({ o }) {
+  const L0 = useLoc(),
+    courier = L0.pos && L0.pos.on && Date.now() - L0.pos.t < 120000 ? L0.pos : null,
+    R = o.rlat != null ? { lat: o.rlat, lng: o.rlng } : null,
+    P = o.mlat != null ? { lat: o.mlat, lng: o.mlng } : null,
+    picked = o.stage >= 3,
+    path = (picked ? [courier, P] : [courier, R, P]).filter(Boolean),
+    key = path.map(p => Math.round(p.lat * 2500) + "," + Math.round(p.lng * 2500)).join(";"),
+    [rt, setRt] = useState(null),
+    [open, setOpen] = useState(null),
+    fr = uiLanguage === "fr";
+  useEffect(() => {
+    let dead = false;
+    if (path.length < 2) {
+      setRt(null);
+      return;
+    }
+    fetchRoute(path).then(r => !dead && setRt(r && r.legs && r.legs.length === path.length - 1 ? r : { fail: 1 }));
+    return () => {
+      dead = true;
+    };
+  }, [key]);
+  if (!R || !P) return null;
+  const legs = rt && rt.legs,
+    leg1 = !picked && courier && legs ? legs[0] : null,
+    leg2 = legs && (picked ? courier : true) ? legs[legs.length - 1] : null,
+    act = picked ? 2 : 1,
+    shown = open || act,
+    gm = (from, to) =>
+      "https://www.google.com/maps/dir/?api=1" +
+      (from ? "&origin=" + from.lat + "," + from.lng : "") +
+      "&destination=" + to.lat + "," + to.lng + "&travelmode=driving",
+    Step = (n, title, place, leg, done, note, link) => {
+      const rows = leg ? turnRows(leg, fr, n === 1) : [],
+        on = shown === n && !done;
+      return html`<div class=${"rs-step" + (done ? " done" : "") + (n === act ? " now" : "")}><button type="button" class="rs-head" aria-expanded=${on} onClick=${() => setOpen(on ? -1 : n)}><span class="rs-n">${done ? "✓" : n}</span><span class="rs-t"><b>${title}</b><i>${place}</i></span><span class="rs-m">${done ? (fr ? "Fait" : "Done") : leg ? Math.max(1, Math.round(leg.min * 1.2)) + " min · " + fmtDist(leg.km) : ""}</span></button>${on && html`<div class="rs-body">${note && html`<p class="sm mu">${note}</p>`}${rows.length ? html`<ol class="rs-list">${rows.map(r => html`<li><span class="rs-ic"><${TurnIc} ic=${r.ic}/></span><span class="rs-tx">${r.txt}</span>${r.d ? html`<span class="rs-d">${fmtDist(r.d / 1000)}</span>` : null}</li>`)}</ol>` : null}<a class="rs-gm" href=${link} target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l18-8-8 18-2-8z"/></svg>${fr ? "Ouvrir dans Google Maps" : "Open in Google Maps"}</a></div>`}</div>`;
+    },
+    wait = !rt && path.length > 1,
+    noLoc = fr ? "Active ta position pour voir le trajet depuis là où tu es." : "Turn on your location to see the route from where you are.",
+    fail = rt && rt.fail ? (fr ? "Trajet détaillé indisponible pour le moment." : "Detailed route unavailable right now.") : null;
+  return html`<div class="card rs"><div class="rs-top"><b>${fr ? "Ton itinéraire" : "Your route"}</b>${wait ? html`<i class="om-spin"></i>` : html`<span class="sm mu">${fr ? "en voiture" : "by car"}</span>`}</div>${Step(1, fr ? "Récupère la commande" : "Pick up the order", o.rest, leg1, picked, !courier && !picked ? noLoc : fail, gm(null, R))}${Step(2, fr ? "Va au lieu de rencontre" : "Go to the meeting point", o.point, leg2, false, picked && !courier ? noLoc : fail, gm(picked ? null : R, P))}</div>`;
 }
 const LEGAL_CONTACT = "contact.dropby@gmail.com",
   LEGAL_DATE = "12/11/2026";
@@ -6982,7 +7149,7 @@ function Runner({ me, st, orders, setOrders, chat, send, pop, setPop, again, add
       ? html`<div class="scr rise"><h2>No active delivery</h2><p class="mu sm">Accept an order from the feed.</p><${Trail}/></div>`
       : !act
         ? html`<div class="scr rise"><h2>Active deliveries</h2><p class="mu sm">Tap an order to see its details.</p>${acts.map(o => html`<button type="button" class="card tap col" onClick=${() => setSel(o.id)}><div class="row"><b>${o.rest}</b><span class="sp pr">${o.fee} DA</span></div><p class="sm mu">${o.c} · ${o.point} · ${o.items}</p><div class="row"><span class="vtag ok">${tr(STEPS[o.stage])}</span><span class="sp chev"><${Ic} n="back"/></span></div></button>`)}</div>`
-        : html`<div class="scr rise"><button type="button" class="chip" style=${{ alignSelf: "flex-start" }} onClick=${() => setSel(null)}>← All deliveries</button><h2>${act.rest}</h2><${LiveMap} o=${act} side="r"/>${Card(act)}<p class="sm mu">${(act.stage <
+        : html`<div class="scr rise"><button type="button" class="chip" style=${{ alignSelf: "flex-start" }} onClick=${() => setSel(null)}>← All deliveries</button><h2>${act.rest}</h2><${LiveMap} o=${act} side="r"/>${act.live ? html`<${RouteSteps} o=${act}/>` : null}${Card(act)}<p class="sm mu">${(act.stage <
           3
             ? tr("Pay the restaurant {a} DA when you pick up, then collect {b} DA in cash from {c}.")
             : tr("Collect {b} DA in cash from {c}.")
