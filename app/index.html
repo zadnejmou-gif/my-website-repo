@@ -2067,6 +2067,8 @@ const FR = {
   "Can't reach the customer": "Impossible de joindre le client",
   "Release this order": "Libérer cette commande",
   "Release order": "Libérer la commande",
+  "The restaurant is already preparing this order: you can no longer release it.": "Le restaurant prépare déjà cette commande : tu ne peux plus la libérer.",
+  "The restaurant is already preparing this order, it can no longer be released.": "Le restaurant prépare déjà cette commande, elle ne peut plus être libérée.",
   "Report customer": "Signaler le client",
   "Add details (optional)": "Ajouter des détails (facultatif)",
   Send: "Envoyer",
@@ -7002,7 +7004,7 @@ function Runner({ me, st, orders, setOrders, chat, send, pop, setPop, again, add
                     .then(() => sx.refreshLive && sx.refreshLive())
                     .catch(e => alert(e.message))
                 : set(act, 3)}>Order picked up</button>`
-          }${act.stage === 3 && html`<button class="btn" onClick=${() => setPm(true)}>Arrived, enter PIN</button>`}${(act.mine || act.live) && html`<button class="btn g" onClick=${() => setCh(true)}><${Ic} n="chat"/>Chat with customer${chatUnread(act.id) > 0 && html`<em class="chat-bdg">${chatUnread(act.id)}</em>`}</button>`}<button class="btn g" onClick=${() => setRel("c")}>${tr("Report customer")}</button><button class="btn g" onClick=${() => setRel("r")}>${tr("Release order")}</button></div>`;
+          }${act.stage === 3 && html`<button class="btn" onClick=${() => setPm(true)}>Arrived, enter PIN</button>`}${(act.mine || act.live) && html`<button class="btn g" onClick=${() => setCh(true)}><${Ic} n="chat"/>Chat with customer${chatUnread(act.id) > 0 && html`<em class="chat-bdg">${chatUnread(act.id)}</em>`}</button>`}<button class="btn g" onClick=${() => setRel("c")}>${tr("Report customer")}</button>${["prep", "ready"].includes(act.vs) ? html`<p class="sm mu rel-lock">${tr("The restaurant is already preparing this order: you can no longer release it.")}</p>` : html`<button class="btn g" onClick=${() => setRel("r")}>${tr("Release order")}</button>`}</div>`;
   else if (tab === "set")
     b = html`<${Settings} me=${me} sx=${sx} onOut=${sx.out}><div class="card col set-grp"><b>Availability</b><div class="row set-row"><span>Available for deliveries</span><${Tg} on=${sx.prefs.avail !== false} set=${() => sx.setPrefs({ ...sx.prefs, avail: sx.prefs.avail === false })}/></div><div class="row set-row"><span>Cash earned</span><b class="pr">${earn} DA</b></div></div><//>`;
   else
@@ -7038,7 +7040,7 @@ function Runner({ me, st, orders, setOrders, chat, send, pop, setPop, again, add
             }
             sx.refreshLive && sx.refreshLive();
           })
-          .catch(e => alert(e.message));
+          .catch(e => alert(tr(e.message)));
         return;
       }
       addReport({
