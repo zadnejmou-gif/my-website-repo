@@ -1325,6 +1325,22 @@ html[dir="rtl"] .x-role{inset:0 0 auto auto}
 }
 @media (prefers-reduced-motion:reduce){.m3-ring,.m3-dst.hit .m3-ring{animation:none;opacity:.5}.m3d,.m3-hud,.m3-logo{transition:none}}
 /* ===== end 3D maps ===== */
+/* "Follow it live" phone: live 3D map over the map area of the app screenshot (track.webp: x36-744, y532-1322 of 780x1688) */
+.x-gallery .hero-fig .x-scrn{container-type:inline-size}
+/* the screenshot fills the width under a 6.4% status bar (object-position top), so 1 image px = 100cqw/780 */
+.m3-phmap{position:absolute;left:4.615cqw;top:calc(6.4% + 68.205cqw);width:90.77cqw;height:101.28cqw;border-radius:5.2cqw 5.2cqw 0 0;overflow:hidden;container-type:inline-size;pointer-events:none;opacity:0;transition:opacity .9s var(--ease)}
+.m3-phmap.is-3d{opacity:1;background:#E4F1E8}
+.m3-phmap .m3d{opacity:1}
+.m3-phmap .m3-pill{bottom:3.5%;font-size:4.5cqw;padding:1.5cqw 4.5cqw 1.5cqw 1.5cqw;gap:2.6cqw;letter-spacing:-.02em}
+.m3-phmap .m3-pi{width:10cqw;height:10cqw;box-shadow:0 0 0 1.6cqw rgba(61,220,151,.35)}
+.m3-phmap .m3-pi svg,.x-scrn .m3-pi svg{position:static;width:7cqw;height:7cqw}
+.m3-route{position:absolute;right:3.5%;top:3.5%;z-index:3;display:flex;align-items:center;gap:3cqw;padding:2.4cqw 4cqw;border-radius:999px;background:#fff;color:#062A1D;font-size:4.1cqw;font-weight:700;white-space:nowrap;letter-spacing:-.02em;box-shadow:0 2cqw 5cqw -2cqw rgba(0,30,20,.4)}
+[dir=rtl] .m3-route{right:auto;left:3.5%}
+.m3-route svg,.x-scrn .m3-route svg{position:static;width:5cqw;height:5cqw;flex:none}
+.m3-phmap .m3-logo{width:11cqw;height:11cqw;border-width:.9cqw}.m3-phmap .m3-stem{height:4cqw}
+.m3-phmap .m3-dst,.m3-phmap .m3-dst svg{width:10cqw;height:10.7cqw}
+.m3-phmap .m3-car.big{width:12cqw;height:12cqw}
+.x-scrn .m3-phmap img{position:static;inset:auto;width:100%;height:100%;object-position:center}
 
 </style>
 </head>
@@ -2005,13 +2021,13 @@ requestAnimationFrame(tick);
 (function(){
 var D={"restos":[{"id":"fiamma","name":"La Fiamma","lat":36.8087764,"lng":7.7143521,"to":"Bibliothèque centrale UBMA","dest":{"n":"Bibliothèque centrale UBMA","lat":36.8118474,"lng":7.7187682},"km":1.79,"min":9,"line":[[7.71425,36.80866],[7.71346,36.80912],[7.71312,36.80932],[7.71301,36.80939],[7.71219,36.80986],[7.71177,36.81011],[7.71153,36.81027],[7.71134,36.81042],[7.71109,36.8107],[7.71089,36.81094],[7.71058,36.8113],[7.71011,36.81183],[7.71006,36.81196],[7.71005,36.81212],[7.71006,36.81227],[7.71011,36.81245],[7.71019,36.81261],[7.71037,36.81294],[7.71076,36.81355],[7.71086,36.81379],[7.71093,36.8138],[7.71108,36.81383],[7.71184,36.81529],[7.71231,36.8151],[7.71259,36.81495],[7.71274,36.8149],[7.71284,36.81488],[7.71289,36.81487],[7.71304,36.81486],[7.71319,36.81485],[7.7133,36.81482],[7.7171,36.81325],[7.71723,36.8132],[7.71754,36.81307],[7.71856,36.81264],[7.71866,36.81262],[7.71882,36.81258],[7.7195,36.81239],[7.71926,36.81202],[7.71923,36.81199],[7.71908,36.81181],[7.71901,36.81173],[7.7187682,36.8118474]]},{"id":"toronto","name":"Toronto Food","lat":36.809327,"lng":7.713337,"to":"Faculté des Sciences","dest":{"n":"Faculté des Sciences","lat":36.8116845,"lng":7.7167583},"km":1.58,"min":8,"line":[[7.71326,36.80924],[7.71312,36.80932],[7.71301,36.80939],[7.71219,36.80986],[7.71177,36.81011],[7.71153,36.81027],[7.71134,36.81042],[7.71109,36.8107],[7.71089,36.81094],[7.71058,36.8113],[7.71011,36.81183],[7.71006,36.81196],[7.71005,36.81212],[7.71006,36.81227],[7.71011,36.81245],[7.71019,36.81261],[7.71037,36.81294],[7.71076,36.81355],[7.71086,36.81379],[7.71093,36.8138],[7.71108,36.81383],[7.71184,36.81529],[7.71231,36.8151],[7.71259,36.81495],[7.71274,36.8149],[7.71284,36.81488],[7.71289,36.81487],[7.71304,36.81486],[7.71319,36.81485],[7.7133,36.81482],[7.7171,36.81325],[7.71617,36.81242],[7.7162,36.81241],[7.71645,36.81226],[7.71697,36.81186],[7.7167583,36.8116845]]},{"id":"salta","name":"Salta3 Burger","lat":36.8102634,"lng":7.709981,"to":"Résidence 19 Mai 1956","dest":{"n":"Résidence 19 Mai 1956","lat":36.8149554,"lng":7.7118813},"km":0.67,"min":3,"line":[[7.71001,36.81028],[7.7097,36.81056],[7.71009,36.81069],[7.71089,36.81094],[7.71058,36.8113],[7.71011,36.81183],[7.71006,36.81196],[7.71005,36.81212],[7.71006,36.81227],[7.71011,36.81245],[7.71019,36.81261],[7.71037,36.81294],[7.71076,36.81355],[7.71086,36.81379],[7.71093,36.8138],[7.71108,36.81383],[7.7117,36.81502],[7.7118813,36.8149554]]},{"id":"askim","name":"Askim +","lat":36.8201066,"lng":7.719363,"to":"Cefos","dest":{"n":"Cefos","lat":36.8213496,"lng":7.7269034},"km":0.88,"min":5,"line":[[7.71924,36.82004],[7.71925,36.82002],[7.7193,36.81991],[7.72019,36.82008],[7.7206,36.82015],[7.72071,36.82017],[7.7211,36.82027],[7.72141,36.82041],[7.7216,36.82056],[7.72169,36.82069],[7.72182,36.8206],[7.722,36.8205],[7.72212,36.82041],[7.72233,36.82025],[7.72247,36.82006],[7.72263,36.82017],[7.72297,36.82046],[7.72317,36.82065],[7.72323,36.8207],[7.72333,36.82083],[7.72341,36.82094],[7.7235,36.8212],[7.72357,36.82132],[7.72365,36.8214],[7.72374,36.82146],[7.72418,36.8217],[7.72475,36.82202],[7.725,36.8221],[7.72528,36.82214],[7.72554,36.82214],[7.72575,36.82211],[7.72597,36.82207],[7.72682,36.8219],[7.72694,36.82187],[7.72715,36.82179],[7.7269034,36.8213496]]}],"spots":[{"n":"Bibliothèque centrale UBMA","lat":36.8118474,"lng":7.7187682},{"n":"Faculté des Sciences","lat":36.8116845,"lng":7.7167583},{"n":"Résidence 19 Mai 1956","lat":36.8149554,"lng":7.7118813},{"n":"Cefos","lat":36.8213496,"lng":7.7269034},{"n":"Amphis 9 – 10 – 11","lat":36.8134019,"lng":7.7187426},{"n":"Amphis 17 – 18 – 19 – 20","lat":36.8165935,"lng":7.7136724},{"n":"Résidence El Chlef","lat":36.8165553,"lng":7.7150707},{"n":"Département de Biologie","lat":36.8171693,"lng":7.7128587},{"n":"Amphithéâtre Guellati","lat":36.8108696,"lng":7.7189696},{"n":"Amphi 12 (Bloc Informatique)","lat":36.8140617,"lng":7.7179301},{"n":"Faculté des Sciences de la Terre","lat":36.8207717,"lng":7.7217626},{"n":"Faculté de l'Ingénieur","lat":36.811477,"lng":7.7162131},{"n":"Département de Physique","lat":36.8148896,"lng":7.7195211},{"n":"Bibliothèque Sidi Amar","lat":36.8197645,"lng":7.7145857},{"n":"Rectorat – Pôle Sidi Amar","lat":36.8140949,"lng":7.7202921},{"n":"Cité U 1000 lits","lat":36.8124003,"lng":7.7108896},{"n":"Cité U 2000 lits","lat":36.814271,"lng":7.723201},{"n":"Département ST","lat":36.8102066,"lng":7.7156419}]};
 var fig=document.querySelector(".x-pr-map"),live=document.querySelector(".c-map .x-map-real");
-if(!fig&&!live)return;
+if(!fig&&!live&&!document.querySelector(".x-gallery .hero-fig .x-scrn"))return;
 var RM=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches;
 var TOUCH=window.matchMedia&&matchMedia("(hover: none)").matches;
 var T={
- en:{prep:"Preparing",way:"On the way",done:"Handed over",min:"min",arrive:"Your courier arrives in {n} min",here:"Your courier is here",zin:"Zoom in",zout:"Zoom out",tilt:"2D / 3D view",reset:"Reset the view",hint:"Drag to turn the map",tap:"Tap a restaurant",demo:"Demo delivery",campus:"Campus Sidi Amar",map:"3D map of Sidi Amar campus with the partner restaurants and a courier on the way"},
- fr:{prep:"En préparation",way:"En route",done:"Remis",min:"min",arrive:"Ton livreur arrive dans {n} min",here:"Ton livreur est là",zin:"Zoomer",zout:"Dézoomer",tilt:"Vue 2D / 3D",reset:"Revenir à la vue",hint:"Glisse pour tourner la carte",tap:"Touche un restaurant",demo:"Livraison de démo",campus:"Campus Sidi Amar",map:"Carte 3D du campus de Sidi Amar avec les restaurants partenaires et un livreur en route"},
- ar:{prep:"قيد التحضير",way:"في الطريق",done:"تم التسليم",min:"د",arrive:"سيصلك الموصّل خلال {n} د",here:"الموصّل وصل",zin:"تكبير",zout:"تصغير",tilt:"عرض 2D / 3D",reset:"إعادة العرض",hint:"اسحب لتدوير الخريطة",tap:"اختر مطعماً",demo:"توصيل تجريبي",campus:"حرم سيدي عمار",map:"خريطة ثلاثية الأبعاد لحرم سيدي عمار مع المطاعم الشريكة وموصّل في الطريق"}
+ en:{route:"Route to the meeting point",prep:"Preparing",way:"On the way",done:"Handed over",min:"min",arrive:"Your courier arrives in {n} min",here:"Your courier is here",zin:"Zoom in",zout:"Zoom out",tilt:"2D / 3D view",reset:"Reset the view",hint:"Drag to turn the map",tap:"Tap a restaurant",demo:"Demo delivery",campus:"Campus Sidi Amar",map:"3D map of Sidi Amar campus with the partner restaurants and a courier on the way"},
+ fr:{route:"Itinéraire vers le point de rencontre",prep:"En préparation",way:"En route",done:"Remis",min:"min",arrive:"Ton livreur arrive dans {n} min",here:"Ton livreur est là",zin:"Zoomer",zout:"Dézoomer",tilt:"Vue 2D / 3D",reset:"Revenir à la vue",hint:"Glisse pour tourner la carte",tap:"Touche un restaurant",demo:"Livraison de démo",campus:"Campus Sidi Amar",map:"Carte 3D du campus de Sidi Amar avec les restaurants partenaires et un livreur en route"},
+ ar:{route:"الطريق إلى نقطة اللقاء",prep:"قيد التحضير",way:"في الطريق",done:"تم التسليم",min:"د",arrive:"سيصلك الموصّل خلال {n} د",here:"الموصّل وصل",zin:"تكبير",zout:"تصغير",tilt:"عرض 2D / 3D",reset:"إعادة العرض",hint:"اسحب لتدوير الخريطة",tap:"اختر مطعماً",demo:"توصيل تجريبي",campus:"حرم سيدي عمار",map:"خريطة ثلاثية الأبعاد لحرم سيدي عمار مع المطاعم الشريكة وموصّل في الطريق"}
 };
 function lang(){var s=document.getElementById("languageSelect");var l=s&&s.value;return T[l]?l:"en"}
 function t(k,n){var s=T[lang()][k]||T.en[k];return n==null?s:s.replace("{n}",n)}
@@ -2180,37 +2196,43 @@ function partners(ml){
  }).catch(function(e){box.remove();fig.classList.remove("is-3d");console.warn("3D map off:",e&&e.message,e&&e.stack,fig.clientWidth,fig.clientHeight)});
 }
 
-/* ================= 2) "Live on the map" card: follow camera ================= */
-function follow(ml){
- var box=el("div","m3d m3d-live");box.setAttribute("aria-hidden","true");live.insertBefore(box,live.firstChild);
- var r=D.restos[1],eta=live.querySelector(".x-eta");
- style().then(function(st){return newMap(ml,box,{style:st,center:r.line[0],zoom:16.6,pitch:62,bearing:at(r,0).h,interactive:false,attributionControl:{compact:true}})}).then(function(map){
-  live.classList.add("is-3d");
+/* ================= 2) follow camera: "Live on the map" card + the "Follow it live" phone ================= */
+/* host = the box that gets the map; phone = draw it over the map area of the app screenshot, with the app's pills */
+function follow(ml,host,phone){
+ var box=el("div","m3d m3d-live");box.setAttribute("aria-hidden","true");host.insertBefore(box,host.firstChild);
+ var r=D.restos[phone?0:1],eta=phone?null:host.querySelector(".x-eta"),Z=phone?16.1:16.7;
+ style().then(function(st){return newMap(ml,box,{style:st,center:r.line[0],zoom:Z,pitch:phone?55:62,bearing:at(r,0).h,interactive:false,attributionControl:phone?false:{compact:true}})}).then(function(map){
+  host.classList.add("is-3d");
   var at1=box.querySelector(".maplibregl-ctrl-attrib");at1&&at1.classList.remove("maplibregl-compact-show");
-  routeLayers(map,"lv",9);
+  routeLayers(map,"lv",phone?6:9);
   var R=el("div","m3-r on m3-small",'<span class="m3-logo"><img alt="" src="'+(LOGO[r.id]||"")+'"></span><i class="m3-stem"></i>');
   new ml.Marker({element:R,anchor:"bottom"}).setLngLat([r.lng,r.lat]).addTo(map);
   var dst=el("div","m3-dst",'<span class="m3-ring"></span><span class="m3-ring r2"></span>'+PIN);new ml.Marker({element:dst,anchor:"bottom"}).setLngLat([r.dest.lng,r.dest.lat]).addTo(map);
   var carE=el("div","m3-car big",CAR),CM=new ml.Marker({element:carE,anchor:"center",rotationAlignment:"map",pitchAlignment:"map"}).setLngLat(r.line[0]).addTo(map);
-  var pill=el("div","m3-pill",'<span class="m3-pi">'+CAR+'</span><b></b>');live.appendChild(pill);
-  var tm=0,h=at(r,0).h,dr=Math.max(9,r.len*6);
+  var pill=el("div","m3-pill",'<span class="m3-pi">'+CAR+'</span><b></b>');host.appendChild(pill);
+  var top=null;if(phone){top=el("div","m3-route",'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11 21 3l-8 18-2-8z" fill="#2563EB"/></svg><b></b>');host.appendChild(top)}
+  var tm=phone?2.5:0,h=at(r,0).h,dr=Math.max(9,r.len*6);
   function frame(dt){tm+=dt;if(RM)tm=PREP+dr*.55;var ph=phase(r,tm,dr),g=at(r,ph.f);
    map.getSource("lv-a").setData(fc([ph.s==="done"?null:g.after]));map.getSource("lv-b").setData(fc([g.before]));
    if(ph.s==="way")h=angLerp(h,g.h,Math.min(1,dt*2.5));
    CM.setLngLat(g.p).setRotation(h);
    /* camera sits behind the car, looking ahead (the app's follow mode) */
-   map.jumpTo({center:g.p,bearing:angLerp(map.getBearing(),h,RM?1:Math.min(1,dt*1.6)),zoom:16.7,pitch:62,padding:{top:box.clientHeight*.32,bottom:0,left:0,right:0}});
+   map.jumpTo({center:g.p,bearing:angLerp(map.getBearing(),h,RM?1:Math.min(1,dt*1.6)),zoom:Z,pitch:phone?55:62,padding:{top:box.clientHeight*(phone?.28:.32),bottom:0,left:0,right:0}});
    dst.classList.toggle("hit",ph.s==="done");
    var n=ph.s==="done"?0:etaMin(r,ph.f);
    if(eta)eta.textContent=n?"~"+n+" "+t("min"):"✓";
    pill.querySelector("b").textContent=n?t("arrive",n):t("here");
+   if(top)top.querySelector("b").textContent=t("route");
    if(!RM&&ph.s==="done"&&ph.k>=1){tm=0;h=at(r,0).h}
   }
   loop(box,frame);
- }).catch(function(e){box.remove();live.classList.remove("is-3d");console.warn("3D live map off:",e&&e.message)});
+ }).catch(function(e){box.remove();host.classList.remove("is-3d");console.warn("3D follow map off:",e&&e.message)});
 }
+/* the "Follow it live" phone: a box over the map area of the screenshot (same place as in the app) */
+var scr=document.querySelector(".x-gallery .hero-fig .x-scrn"),ph=null;
+if(scr){ph=el("div","m3-phmap");scr.appendChild(ph)}
 
-[[fig,partners],[live,follow]].forEach(function(x){if(x[0])whenNear(x[0],function(){loadGL().then(x[1]).catch(function(){})})});
+[[fig,partners],[live,function(ml){follow(ml,live,false)}],[ph,function(ml){follow(ml,ph,true)}]].forEach(function(x){if(x[0])whenNear(x[0],function(){loadGL().then(x[1]).catch(function(){})})});
 })();
 </script>
 
