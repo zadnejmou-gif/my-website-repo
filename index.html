@@ -1223,6 +1223,109 @@ html[dir="rtl"] .x-role{inset:0 0 auto auto}
 .tm-car-still{display:none}
 @media (prefers-reduced-motion:reduce){.x-map-real .tm-car,.x-map-real .tm-done,.x-map-real .tm-ring{display:none}.x-map-real .tm-car-still{display:inline}}
 
+/* ===== 3D maps (map3d.js): partner restaurants + live card ===== */
+.m3d,.m3d.maplibregl-map{position:absolute;inset:0;z-index:1;opacity:0;transition:opacity .9s var(--ease)}
+.is-3d>.m3d{opacity:1}
+.x-pr-map.is-3d>img,.x-pr-map.is-3d>.m-wide,.x-pr-map.is-3d>.m-tall{visibility:hidden}
+.x-map-real.is-3d>img,.x-map-real.is-3d>svg{visibility:hidden}
+.x-pr-map .x-pr-tag,.x-map-real .x-live,.x-map-real .x-eta{z-index:3}
+.m3d .maplibregl-ctrl-attrib{font-size:10px;background:rgba(255,255,255,.7)!important;border-radius:999px!important}
+.m3d .maplibregl-ctrl-bottom-right{bottom:0;right:0}
+.m3d .maplibregl-canvas{outline:none}
+/* restaurant: round logo raised on a stem, name chip, active = bigger + glow */
+.m3-r{background:none;border:0;padding:0;margin:0;font:inherit;color:inherit;display:grid;justify-items:center;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.m3-logo{display:block;width:58px;height:58px;border-radius:50%;overflow:hidden;background:#fff;border:4px solid #fff;box-shadow:0 14px 26px -10px rgba(0,40,25,.65),0 0 0 1px rgba(6,42,29,.08);transition:transform .45s var(--ease),box-shadow .45s var(--ease);transform-origin:50% 100%}
+.m3-logo img{display:block;width:100%;height:100%;object-fit:cover}
+.m3-stem{display:block;width:3px;height:22px;margin-top:-2px;border-radius:2px;background:linear-gradient(#fff,rgba(255,255,255,.35));box-shadow:0 0 0 1px rgba(6,42,29,.12);position:relative}
+.m3-stem:after{content:"";position:absolute;left:50%;bottom:-5px;width:16px;height:7px;margin-left:-8px;border-radius:50%;background:rgba(6,42,29,.28);filter:blur(1.5px)}
+.m3-name{position:absolute;top:21px;left:calc(100% + 6px);white-space:nowrap;padding:6px 12px;border-radius:999px;background:#062A1D;color:#fff;font-size:13px;font-weight:700;letter-spacing:-.01em;box-shadow:0 8px 18px -8px rgba(0,0,0,.6);transform:translateY(-50%);transition:background .3s}
+.m3-r-toronto .m3-stem{height:62px}
+.m3-r-salta .m3-name{left:auto;right:calc(100% + 6px)}
+.m3-r-askim .m3-stem{height:30px}
+.m3-r.on .m3-logo{transform:scale(1.22);box-shadow:0 0 0 6px rgba(61,220,151,.35),0 18px 30px -10px rgba(0,40,25,.7)}
+.m3-r.on .m3-name{background:#0E7A4F}
+.m3-r.hov .m3-logo,.m3-r:hover .m3-logo{transform:scale(1.14)}
+.m3-r.on.hov .m3-logo,.m3-r.on:hover .m3-logo{transform:scale(1.26)}
+.m3-r:focus-visible .m3-logo{outline:3px solid #3DDC97;outline-offset:3px}
+.m3-small .m3-logo{width:46px;height:46px;border-width:3px}.m3-small .m3-stem{height:16px}
+.m3-place{display:inline-flex;align-items:center;gap:7px;padding:7px 13px;border-radius:999px;background:rgba(255,255,255,.94);color:#062A1D;font-size:13px;font-weight:700;white-space:nowrap;box-shadow:0 8px 18px -10px rgba(0,40,25,.55);pointer-events:none}
+.m3-place i{width:8px;height:8px;border-radius:50%;background:#3DDC97;box-shadow:0 0 0 4px rgba(61,220,151,.25)}
+/* meeting point pin with a ring that pulses, burst on hand-over */
+.m3-dst{position:relative;width:44px;height:47px;pointer-events:none}
+.m3-dst svg{position:relative;width:44px;height:47px;filter:drop-shadow(0 8px 10px rgba(0,40,26,.35))}
+.m3-ring{position:absolute;left:50%;bottom:-8px;width:46px;height:16px;margin-left:-23px;border-radius:50%;border:2px solid rgba(14,122,79,.6);animation:m3Ring 2.2s ease-out infinite}
+.m3-ring.r2{animation-delay:1.1s}
+.m3-dst.hit .m3-ring{border-color:#1FAF6E;animation:m3Hit 1.1s cubic-bezier(.2,.9,.3,1) infinite}
+@keyframes m3Fade{to{opacity:0;visibility:hidden}}
+@keyframes m3Ring{0%{transform:scale(.5);opacity:.9}100%{transform:scale(1.9);opacity:0}}
+@keyframes m3Hit{0%{transform:scale(.6);opacity:1;border-width:3px}100%{transform:scale(3);opacity:0;border-width:1px}}
+.m3-car{width:44px;height:44px;filter:drop-shadow(0 4px 5px rgba(0,0,0,.45));transition:opacity .5s;pointer-events:none}
+.m3-car.big{width:66px;height:66px}
+.m3-car svg,.x-map .m3-car svg{position:static;width:100%;height:100%;display:block}
+.m3-car.hide{opacity:0}
+/* HUD */
+.m3-hud{position:absolute;inset:0;z-index:2;pointer-events:none;opacity:0;transition:opacity .8s var(--ease) .3s}
+.is-3d>.m3-hud{opacity:1}
+.m3-hud>*{pointer-events:auto}
+.m3-ctl{position:absolute;right:16px;top:16px;display:flex;flex-direction:column;border-radius:16px;background:rgba(6,42,29,.88);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);box-shadow:0 12px 30px -14px rgba(0,0,0,.7),inset 0 0 0 1px rgba(255,255,255,.08);overflow:hidden}
+[dir=rtl] .m3-ctl{right:auto;left:16px}
+.m3-ctl button{all:unset;display:grid;place-items:center;width:42px;height:42px;cursor:pointer;color:#fff;transition:background .2s}
+.m3-ctl button+button{border-top:1px solid rgba(255,255,255,.08)}
+.m3-ctl button:hover{background:rgba(61,220,151,.16)}
+.m3-ctl button:focus-visible{background:rgba(61,220,151,.25)}
+.m3-ctl svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.m3-ctl button[data-k=tilt]{color:#3DDC97}.m3-ctl button[data-k=tilt].off{color:#fff}
+[dir=rtl] .m3-hint{left:auto;right:16px}
+.m3-hint{animation:m3Fade .6s 7s forwards;position:absolute;left:16px;top:62px;padding:6px 12px;border-radius:999px;background:rgba(255,255,255,.75);color:#2F5A46;font-size:11.5px;font-weight:600;white-space:nowrap;pointer-events:none}
+.m3-bot{position:absolute;left:16px;right:16px;bottom:16px;display:flex;align-items:flex-end;justify-content:space-between;gap:14px;pointer-events:none}
+.m3-bot>*{pointer-events:auto}
+.m3-chips{display:flex;gap:8px;flex-wrap:wrap;max-width:52%}
+.m3-chip{all:unset;display:inline-flex;align-items:center;gap:8px;padding:5px 13px 5px 5px;border-radius:999px;background:rgba(255,255,255,.92);color:#062A1D;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 8px 20px -12px rgba(0,40,25,.6);transition:background .25s,color .25s,transform .25s}
+.m3-chip img{width:28px;height:28px;border-radius:50%;object-fit:cover}
+.m3-chip:hover{transform:translateY(-2px)}
+.m3-chip.on{background:#062A1D;color:#fff}
+.m3-chip:focus-visible{outline:3px solid #3DDC97;outline-offset:2px}
+.m3-card{display:flex;align-items:center;gap:14px;min-width:min(420px,100%);padding:12px 16px 12px 12px;border-radius:22px;background:rgba(6,42,29,.9);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);color:#fff;box-shadow:0 24px 50px -20px rgba(0,0,0,.8),inset 0 0 0 1px rgba(255,255,255,.08)}
+.m3-cl{flex:none;width:48px;height:48px;border-radius:50%;overflow:hidden;border:3px solid #fff}
+.m3-cl img{width:100%;height:100%;object-fit:cover;display:block}
+.m3-ct{flex:1;min-width:0;display:grid;gap:5px}
+.m3-ct small{font-size:10.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#3DDC97}
+.m3-ct>b{font-size:14.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.m3-arr{color:rgba(255,255,255,.5);font-weight:400}[dir=rtl] .m3-arr{display:inline-block;transform:scaleX(-1)}
+.m3-steps{display:flex;gap:12px;font-size:11.5px;font-weight:600;color:rgba(255,255,255,.4)}
+.m3-steps span{transition:color .3s}
+.m3-card[data-s=prep] [data-s=prep],.m3-card[data-s=way] [data-s=way],.m3-card[data-s=done] [data-s=done]{color:#3DDC97}
+.m3-bar{height:4px;border-radius:4px;background:rgba(255,255,255,.12);overflow:hidden}
+.m3-bar i{display:block;height:100%;background:linear-gradient(90deg,#0E7A4F,#3DDC97);transform-origin:0 50%;transform:scaleX(0);border-radius:4px}
+[dir=rtl] .m3-bar i{transform-origin:100% 50%}
+.m3-eta{flex:none;display:grid;justify-items:center;min-width:52px;padding:6px 8px;border-radius:14px;background:rgba(61,220,151,.14)}
+.m3-eta b{font-size:24px;line-height:1;font-weight:800;color:#3DDC97;font-variant-numeric:tabular-nums}
+.m3-eta small{font-size:11px;font-weight:600;color:rgba(255,255,255,.6)}
+/* live card: "your courier arrives in…" pill */
+.m3-pill{position:absolute;left:50%;bottom:16px;z-index:3;transform:translateX(-50%);display:flex;align-items:center;gap:10px;padding:8px 18px 8px 8px;border-radius:999px;background:#fff;color:#062A1D;font-size:14px;font-weight:700;white-space:nowrap;box-shadow:0 14px 30px -12px rgba(0,30,20,.55);opacity:0;transition:opacity .8s}
+.is-3d>.m3-pill{opacity:1}
+.m3-pi{display:grid;place-items:center;width:32px;height:32px;border-radius:50%;background:#062A1D}
+.m3-pi svg,.x-map .m3-pi svg{position:static;width:24px;height:24px;filter:invert(1)}
+@media (max-width:900px){.m3-chips{max-width:100%}.m3-bot{flex-direction:column;align-items:stretch}.m3-card{min-width:0}}
+@media (max-width:620px){
+ .m3-ctl{top:auto;bottom:auto;top:58px;right:12px}.m3-ctl button{width:38px;height:38px}
+ .m3-hint{display:none}
+ .m3-bot{left:10px;right:10px;bottom:10px;gap:10px}
+ .m3-chips{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin:0 -10px;padding:0 10px}.m3-chips::-webkit-scrollbar{display:none}
+ .m3-chip{flex:none;font-size:12px}.m3-chip img{width:24px;height:24px}
+ .m3-card{padding:10px 12px 10px 10px;gap:10px;border-radius:18px}.m3-cl{width:40px;height:40px}.m3-ct>b{font-size:13px}.m3-steps{gap:8px;font-size:10.5px}.m3-eta b{font-size:20px}
+ .m3-logo{width:48px;height:48px;border-width:3px}.m3-name{font-size:11.5px;padding:5px 10px;top:17px}
+ .x-pr-map.is-3d .x-pr-tag{top:12px;bottom:auto}
+ .x-pr-map.is-3d>.m-tall{height:clamp(560px,150vw,680px);object-fit:cover}
+ .m3-r:not(.on) .m3-name{display:none}.m3-place:has(.m3-campus){display:none}
+ .m3-ctl button[data-k=zin],.m3-ctl button[data-k=zout]{display:none}
+ .m3-ctl button+button{border-top:1px solid rgba(255,255,255,.08)}
+ .m3-ct>b{display:grid;white-space:normal}.m3-ct>b bdi{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.m3-from{font-size:11.5px;color:rgba(255,255,255,.65)}.m3-ct>b .m3-arr{display:none}
+ .m3-pill{font-size:12.5px;bottom:12px}
+}
+@media (prefers-reduced-motion:reduce){.m3-ring,.m3-dst.hit .m3-ring{animation:none;opacity:.5}.m3d,.m3-hud,.m3-logo{transition:none}}
+/* ===== end 3D maps ===== */
+
 </style>
 </head>
 <body>
@@ -1891,6 +1994,223 @@ requestAnimationFrame(tick);
   function upd(){var on=rail.scrollWidth>rail.clientWidth+4;dots.hidden=!on;if(!on)return;var r=rail.getBoundingClientRect(),mid=r.left+r.width/2,best=0,bd=1e9;items.forEach(function(it,i){var c=it.getBoundingClientRect(),d=Math.abs(c.left+c.width/2-mid);if(d<bd){bd=d;best=i}});[].forEach.call(dots.children,function(d,i){d.classList.toggle("on",i===best)})}
   var raf=0;rail.addEventListener("scroll",function(){if(!raf)raf=requestAnimationFrame(function(){raf=0;upd()})},{passive:true});addEventListener("resize",upd);upd();
 });
+})();
+</script>
+<script>
+/* DropBy 3D maps: the app's MapLibre map (OpenFreeMap vector tiles, 3D buildings, emerald route, chrome pin, black car).
+   1) #partner-restaurants: the partner restaurants on a tilted 3D campus, with a demo delivery that drives the real road
+      route from each restaurant to a real meeting point (map3d-data.json, baked by bake_routes.js).
+   2) "Live on the map" card: the app's follow camera behind the courier.
+   The flat images stay underneath and are shown if WebGL, the CDN or the tiles fail. */
+(function(){
+var D={"restos":[{"id":"fiamma","name":"La Fiamma","lat":36.8087764,"lng":7.7143521,"to":"Bibliothèque centrale UBMA","dest":{"n":"Bibliothèque centrale UBMA","lat":36.8118474,"lng":7.7187682},"km":1.79,"min":9,"line":[[7.71425,36.80866],[7.71346,36.80912],[7.71312,36.80932],[7.71301,36.80939],[7.71219,36.80986],[7.71177,36.81011],[7.71153,36.81027],[7.71134,36.81042],[7.71109,36.8107],[7.71089,36.81094],[7.71058,36.8113],[7.71011,36.81183],[7.71006,36.81196],[7.71005,36.81212],[7.71006,36.81227],[7.71011,36.81245],[7.71019,36.81261],[7.71037,36.81294],[7.71076,36.81355],[7.71086,36.81379],[7.71093,36.8138],[7.71108,36.81383],[7.71184,36.81529],[7.71231,36.8151],[7.71259,36.81495],[7.71274,36.8149],[7.71284,36.81488],[7.71289,36.81487],[7.71304,36.81486],[7.71319,36.81485],[7.7133,36.81482],[7.7171,36.81325],[7.71723,36.8132],[7.71754,36.81307],[7.71856,36.81264],[7.71866,36.81262],[7.71882,36.81258],[7.7195,36.81239],[7.71926,36.81202],[7.71923,36.81199],[7.71908,36.81181],[7.71901,36.81173],[7.7187682,36.8118474]]},{"id":"toronto","name":"Toronto Food","lat":36.809327,"lng":7.713337,"to":"Faculté des Sciences","dest":{"n":"Faculté des Sciences","lat":36.8116845,"lng":7.7167583},"km":1.58,"min":8,"line":[[7.71326,36.80924],[7.71312,36.80932],[7.71301,36.80939],[7.71219,36.80986],[7.71177,36.81011],[7.71153,36.81027],[7.71134,36.81042],[7.71109,36.8107],[7.71089,36.81094],[7.71058,36.8113],[7.71011,36.81183],[7.71006,36.81196],[7.71005,36.81212],[7.71006,36.81227],[7.71011,36.81245],[7.71019,36.81261],[7.71037,36.81294],[7.71076,36.81355],[7.71086,36.81379],[7.71093,36.8138],[7.71108,36.81383],[7.71184,36.81529],[7.71231,36.8151],[7.71259,36.81495],[7.71274,36.8149],[7.71284,36.81488],[7.71289,36.81487],[7.71304,36.81486],[7.71319,36.81485],[7.7133,36.81482],[7.7171,36.81325],[7.71617,36.81242],[7.7162,36.81241],[7.71645,36.81226],[7.71697,36.81186],[7.7167583,36.8116845]]},{"id":"salta","name":"Salta3 Burger","lat":36.8102634,"lng":7.709981,"to":"Résidence 19 Mai 1956","dest":{"n":"Résidence 19 Mai 1956","lat":36.8149554,"lng":7.7118813},"km":0.67,"min":3,"line":[[7.71001,36.81028],[7.7097,36.81056],[7.71009,36.81069],[7.71089,36.81094],[7.71058,36.8113],[7.71011,36.81183],[7.71006,36.81196],[7.71005,36.81212],[7.71006,36.81227],[7.71011,36.81245],[7.71019,36.81261],[7.71037,36.81294],[7.71076,36.81355],[7.71086,36.81379],[7.71093,36.8138],[7.71108,36.81383],[7.7117,36.81502],[7.7118813,36.8149554]]},{"id":"askim","name":"Askim +","lat":36.8201066,"lng":7.719363,"to":"Cefos","dest":{"n":"Cefos","lat":36.8213496,"lng":7.7269034},"km":0.88,"min":5,"line":[[7.71924,36.82004],[7.71925,36.82002],[7.7193,36.81991],[7.72019,36.82008],[7.7206,36.82015],[7.72071,36.82017],[7.7211,36.82027],[7.72141,36.82041],[7.7216,36.82056],[7.72169,36.82069],[7.72182,36.8206],[7.722,36.8205],[7.72212,36.82041],[7.72233,36.82025],[7.72247,36.82006],[7.72263,36.82017],[7.72297,36.82046],[7.72317,36.82065],[7.72323,36.8207],[7.72333,36.82083],[7.72341,36.82094],[7.7235,36.8212],[7.72357,36.82132],[7.72365,36.8214],[7.72374,36.82146],[7.72418,36.8217],[7.72475,36.82202],[7.725,36.8221],[7.72528,36.82214],[7.72554,36.82214],[7.72575,36.82211],[7.72597,36.82207],[7.72682,36.8219],[7.72694,36.82187],[7.72715,36.82179],[7.7269034,36.8213496]]}],"spots":[{"n":"Bibliothèque centrale UBMA","lat":36.8118474,"lng":7.7187682},{"n":"Faculté des Sciences","lat":36.8116845,"lng":7.7167583},{"n":"Résidence 19 Mai 1956","lat":36.8149554,"lng":7.7118813},{"n":"Cefos","lat":36.8213496,"lng":7.7269034},{"n":"Amphis 9 – 10 – 11","lat":36.8134019,"lng":7.7187426},{"n":"Amphis 17 – 18 – 19 – 20","lat":36.8165935,"lng":7.7136724},{"n":"Résidence El Chlef","lat":36.8165553,"lng":7.7150707},{"n":"Département de Biologie","lat":36.8171693,"lng":7.7128587},{"n":"Amphithéâtre Guellati","lat":36.8108696,"lng":7.7189696},{"n":"Amphi 12 (Bloc Informatique)","lat":36.8140617,"lng":7.7179301},{"n":"Faculté des Sciences de la Terre","lat":36.8207717,"lng":7.7217626},{"n":"Faculté de l'Ingénieur","lat":36.811477,"lng":7.7162131},{"n":"Département de Physique","lat":36.8148896,"lng":7.7195211},{"n":"Bibliothèque Sidi Amar","lat":36.8197645,"lng":7.7145857},{"n":"Rectorat – Pôle Sidi Amar","lat":36.8140949,"lng":7.7202921},{"n":"Cité U 1000 lits","lat":36.8124003,"lng":7.7108896},{"n":"Cité U 2000 lits","lat":36.814271,"lng":7.723201},{"n":"Département ST","lat":36.8102066,"lng":7.7156419}]};
+var fig=document.querySelector(".x-pr-map"),live=document.querySelector(".c-map .x-map-real");
+if(!fig&&!live)return;
+var RM=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches;
+var TOUCH=window.matchMedia&&matchMedia("(hover: none)").matches;
+var T={
+ en:{prep:"Preparing",way:"On the way",done:"Handed over",min:"min",arrive:"Your courier arrives in {n} min",here:"Your courier is here",zin:"Zoom in",zout:"Zoom out",tilt:"2D / 3D view",reset:"Reset the view",hint:"Drag to turn the map",tap:"Tap a restaurant",demo:"Demo delivery",campus:"Campus Sidi Amar",map:"3D map of Sidi Amar campus with the partner restaurants and a courier on the way"},
+ fr:{prep:"En préparation",way:"En route",done:"Remis",min:"min",arrive:"Ton livreur arrive dans {n} min",here:"Ton livreur est là",zin:"Zoomer",zout:"Dézoomer",tilt:"Vue 2D / 3D",reset:"Revenir à la vue",hint:"Glisse pour tourner la carte",tap:"Touche un restaurant",demo:"Livraison de démo",campus:"Campus Sidi Amar",map:"Carte 3D du campus de Sidi Amar avec les restaurants partenaires et un livreur en route"},
+ ar:{prep:"قيد التحضير",way:"في الطريق",done:"تم التسليم",min:"د",arrive:"سيصلك الموصّل خلال {n} د",here:"الموصّل وصل",zin:"تكبير",zout:"تصغير",tilt:"عرض 2D / 3D",reset:"إعادة العرض",hint:"اسحب لتدوير الخريطة",tap:"اختر مطعماً",demo:"توصيل تجريبي",campus:"حرم سيدي عمار",map:"خريطة ثلاثية الأبعاد لحرم سيدي عمار مع المطاعم الشريكة وموصّل في الطريق"}
+};
+function lang(){var s=document.getElementById("languageSelect");var l=s&&s.value;return T[l]?l:"en"}
+function t(k,n){var s=T[lang()][k]||T.en[k];return n==null?s:s.replace("{n}",n)}
+/* restaurant logos: reuse the round logos already in the page (no second copy) */
+/* matched by the restaurant name in the card title (alt texts get translated) */
+function rid(li){var h=li.querySelector("h3"),n=h?h.textContent.trim():"",f=null;D.restos.forEach(function(r){if(n===r.name)f=r});return f}
+var LOGO={};[].forEach.call(document.querySelectorAll(".x-pr"),function(li){var r=rid(li),im=li.querySelector("img.x-pr-logo");if(r&&im)LOGO[r.id]=im.getAttribute("src")});
+var CAR='<svg viewBox="0 0 40 40" aria-hidden="true"><rect x="12" y="5" width="16" height="30" rx="6" fill="#111"/><rect x="14" y="10" width="12" height="6" rx="2" fill="#5B6B66"/><rect x="14" y="25" width="12" height="5" rx="2" fill="#5B6B66"/><rect x="12" y="17" width="16" height="7" rx="1" fill="#222"/><circle cx="14.5" cy="7" r="1.3" fill="#FFE27A"/><circle cx="25.5" cy="7" r="1.3" fill="#FFE27A"/></svg>';
+var PIN='<svg viewBox="0 0 44 47" aria-hidden="true"><defs><linearGradient id="m3PinG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7CF0BE"/><stop offset=".3" stop-color="#1FAF6E"/><stop offset=".6" stop-color="#0A6B43"/><stop offset=".8" stop-color="#2FC583"/><stop offset="1" stop-color="#064A2E"/></linearGradient></defs><path d="M17.5 38.5 22 47l4.5-8.5z" fill="#0B6B44"/><circle cx="22" cy="21" r="18.5" fill="#fff"/><circle cx="22" cy="21" r="15.5" fill="url(#m3PinG)"/><path d="M14 13a10 10 0 0 1 8-4" fill="none" stroke="#fff" stroke-opacity=".7" stroke-width="2" stroke-linecap="round"/><path d="M17 29V13.5M17 14.2h9.6l-2.2 3.6 2.2 3.6H17" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+var ICO={plus:'<svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>',minus:'<svg viewBox="0 0 24 24"><path d="M5 12h14"/></svg>',cube:'<svg viewBox="0 0 24 24"><path d="M12 3 4 7.5v9L12 21l8-4.5v-9L12 3zM4 7.5 12 12l8-4.5M12 12v9"/></svg>',home:'<svg viewBox="0 0 24 24"><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/><circle cx="12" cy="12" r="4.5"/></svg>'};
+
+/* ---------- MapLibre, loaded only when a map comes near the screen ---------- */
+var GLP=null;
+function loadGL(){return GLP||(GLP=new Promise(function(res,rej){
+ if(window.maplibregl)return res(window.maplibregl);
+ var c=document.createElement("link");c.rel="stylesheet";c.href="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/4.7.1/maplibre-gl.min.css";c.integrity="sha384-K282sW/zFjTkrjR/+yr1H+gCukuy4OEYrkXRybV88g7pk+kZZYpNV6SAV59NcgFg";c.crossOrigin="anonymous";document.head.appendChild(c);
+ var s=document.createElement("script");s.src="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/4.7.1/maplibre-gl.min.js";s.integrity="sha384-KKgyz2mG25bKJ1O2PyqTJPlAF8Kw2BpDmsLTNBXslICOBvhTAyF5F0XhLWF2ZovY";s.crossOrigin="anonymous";
+ s.onload=function(){var ml=window.maplibregl;ml&&ml.supported&&!ml.supported()?rej(new Error("no webgl")):ml?res(ml):rej(new Error("no maplibre"))};
+ s.onerror=function(e){GLP=null;rej(e)};document.head.appendChild(s);
+}))}
+/* OpenFreeMap "positron", recoloured in the site's mint greens, plus 3D buildings */
+var STP=null;
+function style(){
+ STP=STP||fetch("https://tiles.openfreemap.org/styles/positron").then(function(r){return r.ok?r.json():Promise.reject(r.status)});
+ return STP.then(function(s0){
+  var st=JSON.parse(JSON.stringify(s0)),C={bg:"#E4F1E8",res:"#DCEDE1",park:"#C3E3CB",water:"#B4DCE4",road:"#FFFFFF",casing:"#C9E0D0",path:"#D2E7D8",bld:"#F4FBF6",txt:"#557566",halo:"#EEF7F1"};
+  st.layers=st.layers.filter(function(l){return !/boundary|ice_shelf|glacier|railway|aeroway|shield|airport|label_country|label_state|poi/.test(l.id)&&l.id!=="building"});
+  st.layers.forEach(function(l){var p=l.paint=l.paint||{},id=l.id;
+   if(l.type==="background")p["background-color"]=C.bg;
+   else if(l.type==="fill"){p["fill-color"]=/water/.test(id)?C.water:/park|wood|landcover|grass/.test(id)?C.park:/residential/.test(id)?C.res:p["fill-color"];if(/park|wood/.test(id))p["fill-opacity"]=.9}
+   else if(l.type==="line"){if(/water/.test(id))p["line-color"]=C.water;else if(/casing/.test(id))p["line-color"]=C.casing;else if(/path/.test(id))p["line-color"]=C.path;else if(/major|motorway|minor|pier|street|road|highway/.test(id))p["line-color"]=C.road}
+   else if(l.type==="symbol"){p["text-color"]=C.txt;p["text-halo-color"]=C.halo;p["text-halo-width"]=1.4}});
+  st.layers.push({id:"db-bld",type:"fill-extrusion",source:"openmaptiles","source-layer":"building",minzoom:13.5,paint:{"fill-extrusion-color":["interpolate",["linear"],["coalesce",["get","render_height"],8],0,"#EDF8F1",30,"#FAFFFC"],"fill-extrusion-height":["interpolate",["linear"],["zoom"],13.5,0,14.6,["*",1.35,["coalesce",["get","render_height"],8]]],"fill-extrusion-base":["coalesce",["get","render_min_height"],0],"fill-extrusion-opacity":.9,"fill-extrusion-vertical-gradient":true}});
+  st.light={anchor:"viewport",color:"#F2FFF7",intensity:.32,position:[1.4,210,35]};
+  st.sky={"sky-color":"#0B4A31","horizon-color":"#D9F0E2","fog-color":"#E4F1E8","sky-horizon-blend":.6,"horizon-fog-blend":.7,"fog-ground-blend":.55};
+  return st;
+ })}
+
+/* ---------- route geometry ---------- */
+var RAD=Math.PI/180;
+function dist(a,b){var x=(b[0]-a[0])*Math.cos((a[1]+b[1])/2*RAD),y=b[1]-a[1];return Math.sqrt(x*x+y*y)*111.32}
+function brg(a,b){var y=Math.sin((b[0]-a[0])*RAD)*Math.cos(b[1]*RAD),x=Math.cos(a[1]*RAD)*Math.sin(b[1]*RAD)-Math.sin(a[1]*RAD)*Math.cos(b[1]*RAD)*Math.cos((b[0]-a[0])*RAD);return(Math.atan2(y,x)/RAD+360)%360}
+D.restos.forEach(function(r){var c=[0];for(var i=1;i<r.line.length;i++)c.push(c[i-1]+dist(r.line[i-1],r.line[i]));r.cum=c;r.len=c[c.length-1]});
+/* point at fraction f of the route, its heading, and the line split there */
+function at(r,f){var d=Math.max(0,Math.min(1,f))*r.len,L=r.line,c=r.cum,i=1;while(i<L.length-1&&c[i]<d)i++;
+ var a=L[i-1],b=L[i],k=c[i]>c[i-1]?(d-c[i-1])/(c[i]-c[i-1]):0,p=[a[0]+(b[0]-a[0])*k,a[1]+(b[1]-a[1])*k];
+ return{p:p,h:brg(a,b),before:L.slice(0,i).concat([p]),after:[p].concat(L.slice(i))}}
+function fc(lines,props){return{type:"FeatureCollection",features:lines.filter(function(l){return l&&l.length>1}).map(function(l,i){return{type:"Feature",properties:props?props[i]:{},geometry:{type:"LineString",coordinates:l}}})}}
+function angLerp(a,b,k){var d=((b-a+540)%360)-180;return a+d*k}
+function ease(x){return x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2}
+function el(tag,cls,html){var e=document.createElement(tag);if(cls)e.className=cls;if(html!=null)e.innerHTML=html;return e}
+
+function routeLayers(map,id,w){
+ var cap={"line-cap":"round","line-join":"round"},E={type:"FeatureCollection",features:[]};
+ map.addSource(id+"-a",{type:"geojson",data:E});map.addSource(id+"-b",{type:"geojson",data:E});
+ map.addLayer({id:id+"-b",type:"line",source:id+"-b",layout:cap,paint:{"line-color":"#9FC2AE","line-width":w*.8,"line-opacity":.75,"line-dasharray":[.6,1.6]}});
+ map.addLayer({id:id+"-glow",type:"line",source:id+"-a",layout:cap,paint:{"line-color":"#3CE89A","line-width":w*3.2,"line-blur":w*2,"line-opacity":.42}});
+ map.addLayer({id:id+"-case",type:"line",source:id+"-a",layout:cap,paint:{"line-color":"#FFFFFF","line-width":w*1.9}});
+ map.addLayer({id:id+"-a",type:"line",source:id+"-a",layout:cap,paint:{"line-color":"#0E7A4F","line-width":w}});
+}
+function newMap(ml,box,opt){
+ var m=new ml.Map(Object.assign({container:box,style:opt.style,attributionControl:{compact:true},fadeDuration:0,maxPitch:70,pixelRatio:Math.min(window.devicePixelRatio||1,2),dragRotate:true,touchPitch:false,scrollZoom:false,doubleClickZoom:true,keyboard:false},opt));
+ /* the box can change size after creation (reveal animation, phone layout): keep the canvas in step */
+ if(window.ResizeObserver){var rz=0;new ResizeObserver(function(){cancelAnimationFrame(rz);rz=requestAnimationFrame(function(){m.resize()})}).observe(box)}
+ return new Promise(function(res,rej){var to=setTimeout(function(){rej(new Error("map timeout"))},15000);
+  m.once("load",function(){clearTimeout(to);res(m)});
+  m.on("error",function(e){if(e&&e.error&&/style|webgl|context/i.test(String(e.error.message||""))){clearTimeout(to);rej(e.error)}});
+ });
+}
+/* runs f(frame) while the box is on screen and the tab is visible */
+function loop(box,f){var on=false,raf=0,last=0;
+ function tick(ts){raf=0;if(!on||document.hidden)return;var dt=last?Math.min(.1,(ts-last)/1000):0;last=ts;f(dt);raf=requestAnimationFrame(tick)}
+ function go(){if(on&&!document.hidden&&!raf){last=0;raf=requestAnimationFrame(tick)}}
+ new IntersectionObserver(function(es){on=es[0].isIntersecting;go()},{threshold:.05}).observe(box);
+ document.addEventListener("visibilitychange",go);
+}
+function whenNear(box,f){var io=new IntersectionObserver(function(es){if(es[0].isIntersecting){io.disconnect();f()}},{rootMargin:"700px 0px"});io.observe(box)}
+
+/* a demo delivery: preparing (1.6 s) → drive (DRIVE s) → handed over (2.6 s) */
+var PREP=1.6,DONE=2.6;
+function phase(r,tm,drive){if(tm<PREP)return{s:"prep",f:0,k:tm/PREP};if(tm<PREP+drive)return{s:"way",f:ease((tm-PREP)/drive),k:(tm-PREP)/drive};return{s:"done",f:1,k:Math.min(1,(tm-PREP-drive)/DONE)}}
+function etaMin(r,f){return Math.max(1,Math.ceil(r.min*(1-f)))}
+
+/* ================= 1) partner restaurants map ================= */
+function partners(ml){
+ var box=el("div","m3d");box.setAttribute("role","img");fig.insertBefore(box,fig.firstChild);
+ var bounds=new ml.LngLatBounds();D.restos.forEach(function(r){bounds.extend([r.lng,r.lat]);bounds.extend([r.dest.lng,r.dest.lat])});
+ var narrow=function(){return fig.clientWidth<640};
+ var home=function(){return{pitch:narrow()?52:58,bearing:-18,padding:narrow()?{top:70,bottom:230,left:30,right:30}:{top:80,bottom:150,left:120,right:120}}};
+ style().then(function(st){return newMap(ml,box,{style:st,bounds:bounds,fitBoundsOptions:home(),dragPan:!TOUCH,cooperativeGestures:false})}).then(function(map){
+  window.__dbSiteMap=map;
+  var at0=box.querySelector(".maplibregl-ctrl-attrib");at0&&at0.classList.remove("maplibregl-compact-show");
+  fig.classList.add("is-3d");
+  routeLayers(map,"pr",7);
+  /* meeting points: small white dots, names when you zoom in */
+  map.addSource("spots",{type:"geojson",data:{type:"FeatureCollection",features:D.spots.map(function(s){return{type:"Feature",properties:{n:s.n},geometry:{type:"Point",coordinates:[s.lng,s.lat]}}})}});
+  map.addLayer({id:"spots",type:"circle",source:"spots",paint:{"circle-radius":["interpolate",["linear"],["zoom"],14,2.5,17,5],"circle-color":"#0E7A4F","circle-stroke-color":"#fff","circle-stroke-width":2,"circle-pitch-alignment":"map"}});
+  map.addLayer({id:"spots-n",type:"symbol",source:"spots",minzoom:16.2,layout:{"text-field":["get","n"],"text-font":["Noto Sans Regular"],"text-size":11.5,"text-offset":[0,1.1],"text-anchor":"top","text-max-width":9},paint:{"text-color":"#2F5A46","text-halo-color":"#fff","text-halo-width":1.6}});
+  /* markers */
+  var MK={},cur=0,tm=0,auto=!RM,userAt=0;
+  D.restos.forEach(function(r,i){
+   var e=el("button","m3-r m3-r-"+r.id,'<span class="m3-logo"><img alt="" src="'+(LOGO[r.id]||"")+'"></span><i class="m3-stem"></i><b class="m3-name"><bdi>'+r.name+'</bdi></b>');
+   e.type="button";e.setAttribute("aria-label",r.name);e.addEventListener("click",function(ev){ev.stopPropagation();start(i,true)});
+   MK[r.id]=new ml.Marker({element:e,anchor:"bottom"}).setLngLat([r.lng,r.lat]).addTo(map);
+  });
+  var camp=new ml.Marker({element:el("span","m3-place",'<i></i><bdi class="m3-campus"></bdi>'),anchor:"center"}).setLngLat([7.7172,36.8143]).addTo(map);
+  var cef=new ml.Marker({element:el("span","m3-place",'<i></i>Cefos'),anchor:"center"}).setLngLat([7.7262,36.8226]).addTo(map);
+  var dst=el("div","m3-dst",'<span class="m3-ring"></span><span class="m3-ring r2"></span>'+PIN);
+  var DM=new ml.Marker({element:dst,anchor:"bottom"}).setLngLat([0,0]).addTo(map);
+  var carE=el("div","m3-car",CAR);var CM=new ml.Marker({element:carE,anchor:"center",rotationAlignment:"map",pitchAlignment:"map"}).setLngLat([0,0]).addTo(map);
+  /* HUD: controls, delivery card, restaurant chips */
+  var hud=el("div","m3-hud");
+  var ctr=el("div","m3-ctl");
+  function btn(ic,k,f){var b=el("button","",ICO[ic]);b.type="button";b.dataset.k=k;b.addEventListener("click",function(){userAt=performance.now();f()});ctr.appendChild(b);return b}
+  btn("plus","zin",function(){map.zoomIn({duration:500})});btn("minus","zout",function(){map.zoomOut({duration:500})});
+  var tb=btn("cube","tilt",function(){var p=map.getPitch()>10?0:home().pitch;tb.classList.toggle("off",!p);map.easeTo({pitch:p,duration:900})});
+  btn("home","reset",function(){userAt=0;map.fitBounds(bounds,Object.assign(home(),{duration:1200}))});
+  var card=el("div","m3-card",'<span class="m3-cl"><img alt=""></span><div class="m3-ct"><small class="m3-demo"></small><b><bdi class="m3-from"></bdi><span class="m3-arr"> → </span><bdi class="m3-to"></bdi></b><div class="m3-steps"><span data-s="prep"></span><span data-s="way"></span><span data-s="done"></span></div><div class="m3-bar"><i></i></div></div><div class="m3-eta"><b></b><small></small></div>');
+  var chips=el("div","m3-chips");D.restos.forEach(function(r,i){var c=el("button","m3-chip",'<img alt="" src="'+(LOGO[r.id]||"")+'"><bdi>'+r.name+'</bdi>');c.type="button";c.addEventListener("click",function(){start(i,true)});chips.appendChild(c)});
+  var hint=el("span","m3-hint");
+  hud.appendChild(ctr);hud.appendChild(hint);var bot=el("div","m3-bot");bot.appendChild(chips);bot.appendChild(card);hud.appendChild(bot);fig.appendChild(hud);
+  var Q=function(s){return card.querySelector(s)};
+  function texts(){box.setAttribute("aria-label",t("map"));camp.getElement().querySelector(".m3-campus").textContent=t("campus");
+   [].forEach.call(ctr.children,function(b){b.setAttribute("aria-label",t(b.dataset.k));b.title=t(b.dataset.k)});
+   Q(".m3-demo").textContent=t("demo");["prep","way","done"].forEach(function(s){Q('[data-s="'+s+'"]').textContent=t(s)});Q(".m3-eta small").textContent=t("min");
+   hint.textContent=TOUCH?t("tap"):t("hint")}
+  texts();document.addEventListener("dropby:locale",texts);
+  ["dragstart","rotatestart","zoomstart","pitchstart"].forEach(function(ev){map.on(ev,function(e){if(e.originalEvent)userAt=performance.now()})});
+  function drive(r){return Math.max(6,Math.min(10,r.len*4.6))}
+  /* frames the current delivery's route (jump when dur is 0) */
+  function frameCam(dur){var r=D.restos[cur],b=new ml.LngLatBounds();r.line.forEach(function(p){b.extend(p)});
+   var h=at(r,.5).h,cam=map.cameraForBounds(b,{padding:narrow()?{top:90,bottom:230,left:40,right:40}:{top:110,bottom:190,left:260,right:260},bearing:(h+330)%360});
+   if(!cam||!cam.center||!isFinite(cam.zoom))return;
+   /* framed flat, then tilted: a little closer so the route fills the view */
+   cam={center:cam.center,bearing:cam.bearing,zoom:Math.min(cam.zoom+(narrow()?.35:.55),17.4),pitch:narrow()?50:56};
+   if(RM||!dur)map.jumpTo(cam);else map.flyTo(Object.assign(cam,{duration:dur,essential:true,curve:1.2}));
+  }
+  var rzT=0;map.on("resize",function(){clearTimeout(rzT);rzT=setTimeout(function(){if(performance.now()-userAt>9000||!userAt)frameCam(0)},250)});
+  function start(i,user){cur=(i+D.restos.length)%D.restos.length;tm=0;var r=D.restos[cur];
+   if(user)userAt=0;
+   D.restos.forEach(function(x,j){MK[x.id].getElement().classList.toggle("on",j===cur)});
+   [].forEach.call(chips.children,function(c,j){c.classList.toggle("on",j===cur);c.setAttribute("aria-pressed",j===cur)});
+   Q(".m3-cl img").src=LOGO[r.id]||"";Q(".m3-from").textContent=r.name;Q(".m3-to").textContent=r.dest.n;
+   DM.setLngLat([r.dest.lng,r.dest.lat]);dst.classList.remove("hit");
+   frameCam(user?1600:2400);
+   frame(0);
+  }
+  var lastS="";
+  function frame(dt){var r=D.restos[cur],dr=drive(r);tm+=dt;
+   if(RM)tm=PREP+dr*.6;
+   var ph=phase(r,tm,dr),g=at(r,ph.f);
+   map.getSource("pr-a").setData(fc([ph.s==="done"?null:g.after]));map.getSource("pr-b").setData(fc([g.before]));
+   CM.setLngLat(g.p).setRotation(g.h);
+   carE.classList.toggle("hide",ph.s==="done"&&ph.k>.35);
+   if(ph.s!==lastS){lastS=ph.s;card.dataset.s=ph.s;if(ph.s==="done")dst.classList.add("hit")}
+   Q(".m3-bar i").style.transform="scaleX("+(ph.s==="prep"?.04+ph.k*.08:ph.s==="way"?.12+ph.f*.88:1)+")";
+   Q(".m3-eta b").textContent=ph.s==="done"?"✓":etaMin(r,ph.f);
+   /* the camera turns slowly with the courier, unless the visitor is moving the map */
+   if(auto&&ph.s==="way"&&!map.isMoving()&&performance.now()-userAt>9000)map.setBearing(map.getBearing()+dt*2.2);
+   if(!RM&&ph.s==="done"&&ph.k>=1&&performance.now()-userAt>9000)start(cur+1);
+  }
+  start(0);
+  loop(box,frame);
+  /* hovering a partner above highlights it on the map */
+  [].forEach.call(document.querySelectorAll(".x-pr"),function(li){var r=rid(li);if(!r)return;li.addEventListener("mouseenter",function(){MK[r.id].getElement().classList.add("hov")});li.addEventListener("mouseleave",function(){MK[r.id].getElement().classList.remove("hov")})});
+ }).catch(function(e){box.remove();fig.classList.remove("is-3d");console.warn("3D map off:",e&&e.message,e&&e.stack,fig.clientWidth,fig.clientHeight)});
+}
+
+/* ================= 2) "Live on the map" card: follow camera ================= */
+function follow(ml){
+ var box=el("div","m3d m3d-live");box.setAttribute("aria-hidden","true");live.insertBefore(box,live.firstChild);
+ var r=D.restos[1],eta=live.querySelector(".x-eta");
+ style().then(function(st){return newMap(ml,box,{style:st,center:r.line[0],zoom:16.6,pitch:62,bearing:at(r,0).h,interactive:false,attributionControl:{compact:true}})}).then(function(map){
+  live.classList.add("is-3d");
+  var at1=box.querySelector(".maplibregl-ctrl-attrib");at1&&at1.classList.remove("maplibregl-compact-show");
+  routeLayers(map,"lv",9);
+  var R=el("div","m3-r on m3-small",'<span class="m3-logo"><img alt="" src="'+(LOGO[r.id]||"")+'"></span><i class="m3-stem"></i>');
+  new ml.Marker({element:R,anchor:"bottom"}).setLngLat([r.lng,r.lat]).addTo(map);
+  var dst=el("div","m3-dst",'<span class="m3-ring"></span><span class="m3-ring r2"></span>'+PIN);new ml.Marker({element:dst,anchor:"bottom"}).setLngLat([r.dest.lng,r.dest.lat]).addTo(map);
+  var carE=el("div","m3-car big",CAR),CM=new ml.Marker({element:carE,anchor:"center",rotationAlignment:"map",pitchAlignment:"map"}).setLngLat(r.line[0]).addTo(map);
+  var pill=el("div","m3-pill",'<span class="m3-pi">'+CAR+'</span><b></b>');live.appendChild(pill);
+  var tm=0,h=at(r,0).h,dr=Math.max(9,r.len*6);
+  function frame(dt){tm+=dt;if(RM)tm=PREP+dr*.55;var ph=phase(r,tm,dr),g=at(r,ph.f);
+   map.getSource("lv-a").setData(fc([ph.s==="done"?null:g.after]));map.getSource("lv-b").setData(fc([g.before]));
+   if(ph.s==="way")h=angLerp(h,g.h,Math.min(1,dt*2.5));
+   CM.setLngLat(g.p).setRotation(h);
+   /* camera sits behind the car, looking ahead (the app's follow mode) */
+   map.jumpTo({center:g.p,bearing:angLerp(map.getBearing(),h,RM?1:Math.min(1,dt*1.6)),zoom:16.7,pitch:62,padding:{top:box.clientHeight*.32,bottom:0,left:0,right:0}});
+   dst.classList.toggle("hit",ph.s==="done");
+   var n=ph.s==="done"?0:etaMin(r,ph.f);
+   if(eta)eta.textContent=n?"~"+n+" "+t("min"):"✓";
+   pill.querySelector("b").textContent=n?t("arrive",n):t("here");
+   if(!RM&&ph.s==="done"&&ph.k>=1){tm=0;h=at(r,0).h}
+  }
+  loop(box,frame);
+ }).catch(function(e){box.remove();live.classList.remove("is-3d");console.warn("3D live map off:",e&&e.message)});
+}
+
+[[fig,partners],[live,follow]].forEach(function(x){if(x[0])whenNear(x[0],function(){loadGL().then(x[1]).catch(function(){})})});
 })();
 </script>
 
